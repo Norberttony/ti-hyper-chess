@@ -2,6 +2,7 @@
 #include <ti/getcsc.h>
 #include <graphx.h>
 #include "board-gfx.h"
+#include "board-state.h"
 #include "gfx/gfx.h"
 
 int main(void)
@@ -9,22 +10,20 @@ int main(void)
     gfx_Begin();
     gfx_SetPalette(global_palette, sizeof_global_palette, 0);
 
+    BoardState state = { 0 };
+
+    state_init(&state);
+
     BoardGFX board =
     {
         .px = 4,
         .py = 4,
-        .sqSize = 29
+        .sqSize = 29,
+        .lightIdx = 1,
+        .darkIdx = 2
     };
 
-    drawBoardBG(&board, 1, 2);
-
-    for (int y = 0; y < 2; y++)
-    {
-        for (int x = 0; x < 8; x++)
-        {
-            drawPiece(&board, x, y, y * 8 + x);
-        }
-    }
+    drawBoardState(&board, &state);
 
     while (!os_GetCSC());
 
