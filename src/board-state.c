@@ -35,12 +35,12 @@ void state_init(BoardState* state)
     state->mailbox[g8] = black | springer;
     state->mailbox[h8] = black | coordinator;
 
-    state->mailbox[a1] = white | immobilizer;
+    state->mailbox[a1] = white | coordinator;
     state->mailbox[b1] = white | springer;
     state->mailbox[c1] = white | chameleon;
     state->mailbox[d1] = white | retractor;
     state->mailbox[e1] = white | king;
     state->mailbox[f1] = white | chameleon;
     state->mailbox[g1] = white | springer;
-    state->mailbox[h1] = white | coordinator;
+    state->mailbox[h1] = white | immobilizer;
 }
