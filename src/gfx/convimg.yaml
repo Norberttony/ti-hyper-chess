@@ -25,6 +25,7 @@ converts:
       - black_immobilizer.png
       - black_coordinator.png
       - black_chameleon.png
+      - white_cursor.png
 
 outputs:
   - type: c
