@@ -50,6 +50,11 @@ void drawPiece(BoardGFX* board, int x, int y, int piece)
     {
         return;
     }
+    if (board->isFlipped)
+    {
+        x = 7 - x;
+        y = 7 - y;
+    }
     int sqSize = board->sqSize;
     int px = board->px + x * sqSize + (sqSize - 25) / 2;
     int py = board->py + y * sqSize + (sqSize - 25) - 1;

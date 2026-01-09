@@ -15,7 +15,6 @@ int main(void)
     gfx_SetDrawBuffer();
 
     BoardState state = { 0 };
-
     state_init(&state);
 
     BoardGFX board =
@@ -23,8 +22,9 @@ int main(void)
         .px = 4,
         .py = 4,
         .sqSize = 29,
-        .lightIdx = 1,
-        .darkIdx = 2
+        .lightIdx = 2,
+        .darkIdx = 1,
+        .isFlipped = 1
     };
 
     Cursor cursor = { 0 };
@@ -40,6 +40,7 @@ int main(void)
         prev = curr;
 
         // perform state and graphical updates
+        gfx_FillScreen(255);
         drawBoardState(&board, &state);
 
         // move and draw cursor

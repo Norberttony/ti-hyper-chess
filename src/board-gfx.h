@@ -9,6 +9,7 @@ typedef struct BoardGFX
     int sqSize;
     int lightIdx;
     int darkIdx;
+    int isFlipped;
 } BoardGFX;
 
 void drawBoardBG(BoardGFX* board);
