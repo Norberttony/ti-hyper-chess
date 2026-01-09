@@ -12,9 +12,23 @@ typedef struct BoardGFX
     int isFlipped;
 } BoardGFX;
 
-void drawBoardBG(BoardGFX* board);
-void drawPiece(BoardGFX* board, int x, int y, int piece);
-void drawBoardState(BoardGFX* board, BoardState* state);
+typedef struct Square
+{
+    int x;
+    int y;
+} Square;
+
+// draws the background of a board
+void boardgfx_drawBg(BoardGFX* board);
+
+// draws the background and the pieces of a board
+void boardgfx_drawState(BoardGFX* board, BoardState* state);
+
+// returns the square coordinates of pixel (x, y) graphically
+Square boardgfx_getGfxSq(BoardGFX* board, int x, int y);
+
+// determines if the given square is out of bounds (assuming 8x8 board)
+int boardgfx_isSqOutOfBounds(Square sq);
 
 static inline int get_piece_type(int piece)
 {

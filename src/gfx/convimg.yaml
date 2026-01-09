@@ -26,6 +26,8 @@ converts:
       - black_coordinator.png
       - black_chameleon.png
       - white_cursor.png
+      - select_ind.png
+      - selected_ind.png
 
 outputs:
   - type: c

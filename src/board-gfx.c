@@ -21,7 +21,7 @@ gfx_sprite_t* pieceSprites[16] = {
     black_king
 };
 
-void drawBoardBG(BoardGFX* board)
+void boardgfx_drawBg(BoardGFX* board)
 {
     int sqSize = board->sqSize;
     int px = board->px;
@@ -44,7 +44,7 @@ void drawBoardBG(BoardGFX* board)
     }
 }
 
-void drawPiece(BoardGFX* board, int x, int y, int piece)
+void boardgfx_drawPiece(BoardGFX* board, int x, int y, int piece)
 {
     if (get_piece_type(piece) == 0)
     {
@@ -61,9 +61,9 @@ void drawPiece(BoardGFX* board, int x, int y, int piece)
     gfx_TransparentSprite(pieceSprites[piece], px, py);
 }
 
-void drawBoardState(BoardGFX* board, BoardState* state)
+void boardgfx_drawState(BoardGFX* board, BoardState* state)
 {
-    drawBoardBG(board);
+    boardgfx_drawBg(board);
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
@@ -72,8 +72,37 @@ void drawBoardState(BoardGFX* board, BoardState* state)
             int piece = state->mailbox[idx];
             if (piece)
             {
-                drawPiece(board, x, y, piece);
+                boardgfx_drawPiece(board, x, y, piece);
             }
         }
     }
+}
+
+Square boardgfx_getGfxSq(BoardGFX* board, int x, int y)
+{
+    int ox = x - board->px;
+    int oy = y - board->py;
+
+    // since int division truncates, a -0.1 is 0 despite being on -1
+    if (ox < 0)
+    {
+        ox -= board->sqSize;
+    }
+    if (oy < 0)
+    {
+        oy -= board->sqSize;
+    }
+
+    int sqX = ox / board->sqSize;
+    int sqY = oy / board->sqSize;
+
+    return (Square){
+        .x = sqX,
+        .y = sqY
+    };
+}
+
+int boardgfx_isSqOutOfBounds(Square sq)
+{
+    return sq.x < 0 || sq.y < 0 || sq.x >= 8 || sq.y >= 8;
 }

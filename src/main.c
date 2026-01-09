@@ -6,6 +6,7 @@
 #include "board-gfx.h"
 #include "board-state.h"
 #include "cursor.h"
+#include "indicator.h"
 #include "gfx/gfx.h"
 
 int main(void)
@@ -30,6 +31,8 @@ int main(void)
     Cursor cursor = { 0 };
     cursor_init(&cursor, white_cursor);
 
+    Indicator select = { 0 };
+
     int prev = clock();
 
     kb_Scan();
@@ -41,7 +44,14 @@ int main(void)
 
         // perform state and graphical updates
         gfx_FillScreen(255);
-        drawBoardState(&board, &state);
+        boardgfx_drawState(&board, &state);
+
+        Square sq = boardgfx_getGfxSq(&board, cursor.x, cursor.y);
+        if (!boardgfx_isSqOutOfBounds(sq))
+        {
+            select.sq = sq;
+            indicator_draw(&board, &select);
+        }
 
         // move and draw cursor
         cursor_readInput(&cursor, 100.0f * diff);
