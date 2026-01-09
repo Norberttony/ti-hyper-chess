@@ -1,4 +1,4 @@
-#include "board.h"
+#include "board-gfx.h"
 #include <graphx.h>
 #include "gfx/gfx.h"
 

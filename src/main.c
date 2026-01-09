@@ -1,7 +1,7 @@
 #include <ti/screen.h>
 #include <ti/getcsc.h>
 #include <graphx.h>
-#include "board.h"
+#include "board-gfx.h"
 #include "gfx/gfx.h"
 
 int main(void)
