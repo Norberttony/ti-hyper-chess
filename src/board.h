@@ -1,6 +1,3 @@
 #pragma once
 
-typedef struct BoardState
-{
-    
-} BoardState;
+void drawBoardBG(int px, int py, int sqSize, int darkIdx, int lightIdx);

@@ -1,0 +1,35 @@
+palettes:
+  - name: global_palette
+    fixed-entries:
+      - color: {index: 0, r: 0, g: 255, b: 0}
+      - color: {index: 1, r: 91, g: 110, b: 225}
+      - color: {index: 2, r: 238, g: 195, b: 154}
+    images: automatic
+
+converts:
+  - name: sprites
+    palette: global_palette
+    transparent-color-index: 0
+    images:
+      - white_straddler.png
+      - white_springer.png
+      - white_retractor.png
+      - white_king.png
+      - white_immobilizer.png
+      - white_coordinator.png
+      - white_chameleon.png
+      - black_straddler.png
+      - black_springer.png
+      - black_retractor.png
+      - black_king.png
+      - black_immobilizer.png
+      - black_coordinator.png
+      - black_chameleon.png
+
+outputs:
+  - type: c
+    include-file: gfx.h
+    palettes:
+      - global_palette
+    converts:
+      - sprites

@@ -2,7 +2,7 @@
 # Makefile Options
 # ----------------------------
 
-NAME = HYPERCHESS
+NAME = HYPRCHS
 ICON = icon.png
 DESCRIPTION = "Hyper Chess analysis"
 COMPRESSED = NO
