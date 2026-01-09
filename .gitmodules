@@ -1,0 +1,3 @@
+[submodule "hyper-chess-engine"]
+	path = hyper-chess-engine
+	url = https://github.com/Norberttony/hyper-chess-engine
