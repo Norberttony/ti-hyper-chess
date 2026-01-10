@@ -106,3 +106,8 @@ int boardgfx_isSqOutOfBounds(Square sq)
 {
     return sq.x < 0 || sq.y < 0 || sq.x >= 8 || sq.y >= 8;
 }
+
+int boardgfx_areSquaresEqual(Square sq1, Square sq2)
+{
+    return sq1.x == sq2.x && sq1.y == sq2.y;
+}

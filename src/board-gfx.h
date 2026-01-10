@@ -30,6 +30,8 @@ Square boardgfx_getGfxSq(BoardGFX* board, int x, int y);
 // determines if the given square is out of bounds (assuming 8x8 board)
 int boardgfx_isSqOutOfBounds(Square sq);
 
+int boardgfx_areSquaresEqual(Square sq1, Square sq2);
+
 static inline int get_piece_type(int piece)
 {
     return piece & 0x7;

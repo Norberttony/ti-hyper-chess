@@ -31,7 +31,8 @@ int main(void)
     Cursor cursor = { 0 };
     cursor_init(&cursor, white_cursor);
 
-    Indicator select = { 0 };
+    Indicator from = { 0 };
+    Indicator to = { 0 };
 
     int prev = clock();
 
@@ -46,11 +47,46 @@ int main(void)
         gfx_FillScreen(255);
         boardgfx_drawState(&board, &state);
 
-        Square sq = boardgfx_getGfxSq(&board, cursor.x, cursor.y);
-        if (!boardgfx_isSqOutOfBounds(sq))
+        Indicator* active = 0;
+        Indicator* prev = 0;
+        if (from.type == Select)
         {
-            select.sq = sq;
-            indicator_draw(&board, &select);
+            active = &from;
+        }
+        else if (to.type == Select)
+        {
+            active = &to;
+            prev = &from;
+        }
+
+        Square sq = boardgfx_getGfxSq(&board, cursor.x, cursor.y);
+        if (!boardgfx_isSqOutOfBounds(sq) && active)
+        {
+            active->sq = sq;
+            if (!prev || !boardgfx_areSquaresEqual(prev->sq, sq))
+            {
+                indicator_draw(&board, active);
+            }
+
+            if (prev)
+            {
+                indicator_draw(&board, prev);
+            }
+
+            kb_Scan();
+            if (kb_IsDown(kb_KeyEnter))
+            {
+                if (prev && boardgfx_areSquaresEqual(prev->sq, active->sq))
+                {
+                    // deselect
+                    prev->type = Select;
+                }
+                else
+                {
+                    // select
+                    active->type = Selected;
+                }
+            }
         }
 
         // move and draw cursor
