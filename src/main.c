@@ -37,9 +37,6 @@ int main(void)
     Indicator from = { 0 };
     Indicator to = { 0 };
 
-    Move moveList[MAX_MOVES];
-    int moveListSize = gen_straddler(&state, moveList, d2);
-
     int prev = clock();
 
     kb_Scan();
@@ -58,25 +55,7 @@ int main(void)
         gfx_FillScreen(255);
         boardgfx_drawState(&board, &state);
 
-        Indicator before = from;
-        input_promptMoveStep(&cursor, &board, &from, &to);
-        if (from.type == Ind_Selected)
-        {
-            if (from.sq.x != before.sq.x || from.sq.y != before.sq.y || from.type != before.type)
-            {
-                Square f = from.sq;
-                boardgfx_norm_sq(&board, &f);
-                int mSq = board_to_mailbox(f.x, f.y);
-                // update moves...
-                moveListSize = gen_pieceMoves(&state, moveList, mSq, state.mailbox[mSq]);
-            }
-        }
-        else
-        {
-            moveListSize = 0;
-        }
-
-        indicator_drawMoves(&board, moveList, moveListSize);
+        input_promptMoveStep(&cursor, &board, &state, &from, &to);
 
         // move and draw cursor
         cursor_readInput(&cursor, 100.0f * diff);

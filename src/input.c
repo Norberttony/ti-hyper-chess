@@ -1,8 +1,12 @@
 #include "input.h"
 #include <keypadc.h>
+#include "move-gen.h"
 
-void input_promptMoveStep(Cursor* cursor, BoardGFX* board, Indicator* from, Indicator* to)
+void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to)
 {
+    Move moveList[MAX_MOVES];
+    int moveListSize = 0;
+
     // determine which indicator user is deciding for...
     Indicator* active = 0;
     Indicator* prev = 0;
@@ -47,4 +51,19 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, Indicator* from, Indi
             }
         }
     }
+
+    if (from->type == Ind_Selected)
+    {
+        Square f = from->sq;
+        boardgfx_norm_sq(board, &f);
+        int mSq = board_to_mailbox(f.x, f.y);
+        // update moves...
+        moveListSize = gen_pieceMoves(state, moveList, mSq, state->mailbox[mSq]);
+    }
+    else
+    {
+        moveListSize = 0;
+    }
+
+    indicator_drawMoves(board, moveList, moveListSize);
 }
