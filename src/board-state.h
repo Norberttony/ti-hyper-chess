@@ -22,7 +22,7 @@ typedef struct BoardState
 void state_init(BoardState* state);
 
 // board -> mailbox conversion
-static inline int eightToTen(int x, int y)
+static inline int board_to_mailbox(int x, int y)
 {
     return x + MAILBOX_PADW + (y + MAILBOX_PADH) * MAILBOX_W;
 }

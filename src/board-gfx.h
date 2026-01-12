@@ -34,3 +34,12 @@ Square boardgfx_stateSqToGfxSq(BoardGFX* board, int sq);
 int boardgfx_isSqOutOfBounds(Square sq);
 
 int boardgfx_areSquaresEqual(Square sq1, Square sq2);
+
+static inline void boardgfx_norm_sq(BoardGFX* board, Square* sq)
+{
+    if (board->isFlipped)
+    {
+        sq->x = BOARD_W - sq->x - 1;
+        sq->y = BOARD_H - sq->y - 1;
+    }
+}

@@ -1,0 +1,50 @@
+#include "input.h"
+#include <keypadc.h>
+
+void input_promptMoveStep(Cursor* cursor, BoardGFX* board, Indicator* from, Indicator* to)
+{
+    // determine which indicator user is deciding for...
+    Indicator* active = 0;
+    Indicator* prev = 0;
+    if (from->type == Ind_Off || from->type == Ind_Select)
+    {
+        active = from;
+    }
+    else
+    {
+        prev = from;
+        active = to;
+    }
+
+    active->type = Ind_Select;
+
+    Square sq = boardgfx_getGfxSq(board, cursor->x, cursor->y);
+    if (!boardgfx_isSqOutOfBounds(sq) && active)
+    {
+        active->sq = sq;
+        if (!prev || !boardgfx_areSquaresEqual(prev->sq, sq))
+        {
+            indicator_draw(board, active);
+        }
+
+        if (prev)
+        {
+            indicator_draw(board, prev);
+        }
+
+        kb_Scan();
+        if (kb_IsDown(kb_KeyEnter))
+        {
+            if (prev && boardgfx_areSquaresEqual(prev->sq, active->sq))
+            {
+                // deselect
+                prev->type = Ind_Off;
+            }
+            else
+            {
+                // select
+                active->type = Ind_Selected;
+            }
+        }
+    }
+}

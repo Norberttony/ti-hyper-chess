@@ -10,6 +10,7 @@
 #include "gfx/gfx.h"
 #include "move-gen.h"
 #include "defines.h"
+#include "input.h"
 
 int main(void)
 {
@@ -48,50 +49,31 @@ int main(void)
         float diff = (float)(curr - prev) / CLOCKS_PER_SEC;
         prev = curr;
 
+        if (kb_IsDown(kb_Key2nd))
+        {
+            board.isFlipped = !board.isFlipped;
+        }
+
         // perform state and graphical updates
         gfx_FillScreen(255);
         boardgfx_drawState(&board, &state);
 
-        Indicator* active = 0;
-        Indicator* prev = 0;
-        if (from.type == Ind_Select)
+        Indicator before = from;
+        input_promptMoveStep(&cursor, &board, &from, &to);
+        if (from.type == Ind_Selected)
         {
-            active = &from;
+            if (from.sq.x != before.sq.x || from.sq.y != before.sq.y || from.type != before.type)
+            {
+                Square f = from.sq;
+                boardgfx_norm_sq(&board, &f);
+                int mSq = board_to_mailbox(f.x, f.y);
+                // update moves...
+                moveListSize = gen_pieceMoves(&state, moveList, mSq, state.mailbox[mSq]);
+            }
         }
-        else if (to.type == Ind_Select)
+        else
         {
-            active = &to;
-            prev = &from;
-        }
-
-        Square sq = boardgfx_getGfxSq(&board, cursor.x, cursor.y);
-        if (!boardgfx_isSqOutOfBounds(sq) && active)
-        {
-            active->sq = sq;
-            if (!prev || !boardgfx_areSquaresEqual(prev->sq, sq))
-            {
-                indicator_draw(&board, active);
-            }
-
-            if (prev)
-            {
-                indicator_draw(&board, prev);
-            }
-
-            kb_Scan();
-            if (kb_IsDown(kb_KeyEnter))
-            {
-                if (prev && boardgfx_areSquaresEqual(prev->sq, active->sq))
-                {
-                    // deselect
-                    prev->type = Ind_Select;
-                }
-                else
-                {
-                    // select
-                    active->type = Ind_Selected;
-                }
-            }
+            moveListSize = 0;
         }
 
         indicator_drawMoves(&board, moveList, moveListSize);

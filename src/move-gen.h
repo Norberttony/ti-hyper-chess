@@ -20,5 +20,6 @@ typedef struct Move
 } Move;
 
 int gen_moves(BoardState* state, Move* list);
+int gen_pieceMoves(BoardState* state, Move* list, int sq, int val);
 
 int gen_straddler(BoardState* state, Move* list, int sq);

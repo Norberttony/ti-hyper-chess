@@ -68,7 +68,7 @@ void boardgfx_drawState(BoardGFX* board, BoardState* state)
     {
         for (int x = 0; x < 8; x++)
         {
-            int idx = eightToTen(x, y);
+            int idx = board_to_mailbox(x, y);
             int piece = state->mailbox[idx];
             if (piece)
             {
@@ -115,8 +115,8 @@ Square boardgfx_stateSqToGfxSq(BoardGFX* board, int sq)
     // factor in the board being flipped
     if (board->isFlipped)
     {
-        x = 7 - x;
-        y = 7 - y;
+        x = BOARD_W - x - 1;
+        y = BOARD_H - y - 1;
     }
     
     return (Square){

@@ -6,6 +6,7 @@
 
 enum IndicatorType
 {
+    Ind_Off,
     Ind_Select,
     Ind_Selected,
     Ind_Move,
