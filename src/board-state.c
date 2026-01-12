@@ -3,17 +3,30 @@
 
 void state_init(BoardState* state)
 {
-    for (int i = 0; i < 10; i++)
+    // initialize out of bounds squares
+    for (int y = 0; y < MAILBOX_PADH; y++)
     {
-        // (i, 0)
-        state->mailbox[i] = -1;
-        // (0, i)
-        state->mailbox[i * 10] = -1;
-        // (10, i)
-        state->mailbox[i * 10 + 10] = -1;
-        // (i, 10)
-        state->mailbox[i + 90] = -1;
+        for (int x = 0; x < MAILBOX_W; x++)
+        {
+            // top
+            state->mailbox[x + y * MAILBOX_W] = -1;
+            // bottom
+            state->mailbox[x + (MAILBOX_H - y - 1) * MAILBOX_W] = -1;
+        }
     }
+    for (int x = 0; x < MAILBOX_PADW; x++)
+    {
+        for (int y = 0; y < MAILBOX_H; y++)
+        {
+            // top
+            state->mailbox[x + y * MAILBOX_W] = -1;
+            // bottom
+            state->mailbox[MAILBOX_W - 1 - x + y * MAILBOX_W] = -1;
+        }
+    }
+
+    // hard-coded start position
+    state->toPlay = white;
 
     // straddlers
     for (int i = a2; i <= h2; i++)

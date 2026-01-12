@@ -32,3 +32,8 @@ enum
     a2 = 71, b2, c2, d2, e2, f2, g2, h2,
     a1 = 81, b1, c1, d1, e1, f1, g1, h1
 };
+
+static inline int get_opposing_side(int toPlay)
+{
+    return !toPlay << 3;
+}
