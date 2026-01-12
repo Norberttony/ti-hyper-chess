@@ -26,3 +26,13 @@ static inline int eightToTen(int x, int y)
 {
     return x + MAILBOX_PADW + (y + MAILBOX_PADH) * MAILBOX_W;
 }
+
+static inline int get_piece_type(int piece)
+{
+    return piece & 0x7;
+}
+
+static inline int get_piece_side(int piece)
+{
+    return piece & 0x8;
+}

@@ -21,7 +21,7 @@ const int queenDirs[8] =
     -9      // up right
 };
 
-void genMoves(BoardState* state, Move* list)
+int genMoves(BoardState* state, Move* list)
 {
     int size = 0;
 
@@ -36,7 +36,9 @@ void genMoves(BoardState* state, Move* list)
             case -1:
                 continue;
             
-            
+            case straddler:
+                size += gen_straddler(state, list, i);
+                break;
         }
     }
 
@@ -53,14 +55,13 @@ int gen_straddler(BoardState* state, Move* list, int sq)
     {
         int d = rookDirs[i];
         int idx = sq + d;
-        while (state->mailbox[idx] != -1)
+        while (state->mailbox[idx] == 0)
         {
             Move* m = list + size++;
 
             m->from = sq;
             m->to = idx;
-
-            int cIdx = 0;
+            m->captsCount = 0;
 
             // generate captures
             for (int c = 0; c < 4; c++)
@@ -75,15 +76,16 @@ int gen_straddler(BoardState* state, Move* list, int sq)
                         // normal straddler capture
                         nextVal2 == (side | straddler) ||
                         // OR chameleon-straddler capture...
-                        nextVal2 == (side | chameleon) && nextVal == (opp | straddler)
+                        (nextVal2 == (side | chameleon) && nextVal == (opp | straddler))
                     )
                 )
                 {
-                    m->capts[cIdx].piece = nextVal;
-                    m->capts[cIdx].sq = next;
+                    m->capts[m->captsCount].piece = nextVal;
+                    m->capts[m->captsCount].sq = next;
+                    m->captsCount++;
                 }
             }
-            idx -= d;
+            idx += d;
         }
     }
 

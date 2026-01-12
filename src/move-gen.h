@@ -1,6 +1,8 @@
 #pragma once
 
-#include "board-state.h";
+#include "board-state.h"
+
+#define MAX_MOVES 128
 
 typedef struct PieceCapture
 {
@@ -14,6 +16,7 @@ typedef struct Move
     int from;
     int to;
     PieceCapture capts[4];
+    int captsCount;
 } Move;
 
 int gen_moves(BoardState* state, Move* list);

@@ -8,6 +8,8 @@
 #include "cursor.h"
 #include "indicator.h"
 #include "gfx/gfx.h"
+#include "move-gen.h"
+#include "defines.h"
 
 int main(void)
 {
@@ -34,6 +36,9 @@ int main(void)
     Indicator from = { 0 };
     Indicator to = { 0 };
 
+    Move moveList[MAX_MOVES];
+    int moveListSize = gen_straddler(&state, moveList, d2);
+
     int prev = clock();
 
     kb_Scan();
@@ -49,11 +54,11 @@ int main(void)
 
         Indicator* active = 0;
         Indicator* prev = 0;
-        if (from.type == Select)
+        if (from.type == Ind_Select)
         {
             active = &from;
         }
-        else if (to.type == Select)
+        else if (to.type == Ind_Select)
         {
             active = &to;
             prev = &from;
@@ -79,15 +84,17 @@ int main(void)
                 if (prev && boardgfx_areSquaresEqual(prev->sq, active->sq))
                 {
                     // deselect
-                    prev->type = Select;
+                    prev->type = Ind_Select;
                 }
                 else
                 {
                     // select
-                    active->type = Selected;
+                    active->type = Ind_Selected;
                 }
             }
         }
+
+        indicator_drawMoves(&board, moveList, moveListSize);
 
         // move and draw cursor
         cursor_readInput(&cursor, 100.0f * diff);

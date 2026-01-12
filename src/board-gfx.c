@@ -102,6 +102,29 @@ Square boardgfx_getGfxSq(BoardGFX* board, int x, int y)
     };
 }
 
+Square boardgfx_stateSqToGfxSq(BoardGFX* board, int sq)
+{
+    // get mailbox (x, y)
+    int mx = sq % MAILBOX_W;
+    int my = sq / MAILBOX_W;
+
+    // now convert mailbox coords to board coords
+    int x = mx - MAILBOX_PADW;
+    int y = my - MAILBOX_PADH;
+
+    // factor in the board being flipped
+    if (board->isFlipped)
+    {
+        x = 7 - x;
+        y = 7 - y;
+    }
+    
+    return (Square){
+        .x = x,
+        .y = y
+    };
+}
+
 int boardgfx_isSqOutOfBounds(Square sq)
 {
     return sq.x < 0 || sq.y < 0 || sq.x >= 8 || sq.y >= 8;

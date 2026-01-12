@@ -2,13 +2,14 @@
 
 #include "board-state.h"
 #include "board-gfx.h"
+#include "move-gen.h"
 
 enum IndicatorType
 {
-    Select,
-    Selected,
-    Move,
-    Capture
+    Ind_Select,
+    Ind_Selected,
+    Ind_Move,
+    Ind_Capture
 };
 
 typedef struct Indicator
@@ -18,3 +19,4 @@ typedef struct Indicator
 } Indicator;
 
 void indicator_draw(BoardGFX* board, Indicator* i);
+void indicator_drawMoves(BoardGFX* board, Move* moves, int movesSize);
