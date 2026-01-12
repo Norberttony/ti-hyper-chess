@@ -17,7 +17,10 @@ void indicator_draw(BoardGFX* board, Indicator* i)
             break;
         case Ind_Move:
             gfx_SetColor(0);
-            gfx_FillRectangle(x, y, board->sqSize, board->sqSize);
+            int s = 5; // size of move indicator
+            int sqSize = board->sqSize;
+            int pad = (sqSize - s) / 2;
+            gfx_FillRectangle(x + pad, y + pad, s, s);
             return;
         default:
             return;

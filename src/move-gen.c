@@ -37,6 +37,10 @@ int gen_moves(BoardState* state, Move* list)
 
 int gen_pieceMoves(BoardState* state, Move* list, int sq, int val)
 {
+    if (get_piece_side(val) != state->toPlay)
+    {
+        return 0;
+    }
     switch (get_piece_type(val))
     {
         case straddler:
