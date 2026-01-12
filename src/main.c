@@ -11,6 +11,7 @@
 #include "move-gen.h"
 #include "defines.h"
 #include "input.h"
+#include "keypad-extras.h"
 
 int main(void)
 {
@@ -39,14 +40,16 @@ int main(void)
 
     int prev = clock();
 
-    kb_Scan();
+    key_update();
     while (!kb_IsDown(kb_KeyClear))
     {
         int curr = clock();
         float diff = (float)(curr - prev) / CLOCKS_PER_SEC;
         prev = curr;
 
-        if (kb_IsDown(kb_Key2nd))
+        key_update();
+
+        if (key_wasJustPressed(kb_Key2nd))
         {
             board.isFlipped = !board.isFlipped;
         }
@@ -62,7 +65,6 @@ int main(void)
         cursor_draw(&cursor);
 
         gfx_SwapDraw();
-        kb_Scan();
     }
 
     gfx_End();

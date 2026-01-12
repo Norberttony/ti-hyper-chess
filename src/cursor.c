@@ -11,7 +11,6 @@ void cursor_init(Cursor* cursor, gfx_sprite_t* sprite)
 
 void cursor_readInput(Cursor* cursor, float speed)
 {
-    kb_Scan();
     if (kb_IsDown(kb_KeyRight))
     {
         cursor->x += speed;

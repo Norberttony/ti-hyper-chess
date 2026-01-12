@@ -1,5 +1,6 @@
 #include "input.h"
 #include <keypadc.h>
+#include "keypad-extras.h"
 #include "move-gen.h"
 
 void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to)
@@ -36,8 +37,7 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
             indicator_draw(board, prev);
         }
 
-        kb_Scan();
-        if (kb_IsDown(kb_KeyEnter))
+        if (key_wasJustPressed(kb_KeyEnter))
         {
             if (prev && boardgfx_areSquaresEqual(prev->sq, active->sq))
             {
