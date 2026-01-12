@@ -22,7 +22,7 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
 
     active->type = Ind_Select;
 
-    Square sq = boardgfx_getGfxSq(board, cursor->x, cursor->y);
+    Square sq = boardgfx_pxToGfxSq(board, cursor->x, cursor->y);
     if (!boardgfx_isSqOutOfBounds(sq) && active)
     {
         active->sq = sq;
@@ -54,9 +54,7 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
 
     if (from->type == Ind_Selected)
     {
-        Square f = from->sq;
-        boardgfx_norm_sq(board, &f);
-        int mSq = board_to_mailbox(f.x, f.y);
+        int mSq = board_to_mailbox(from->sq.x, from->sq.y);
         // update moves...
         moveListSize = gen_pieceMoves(state, moveList, mSq, state->mailbox[mSq]);
     }

@@ -78,7 +78,7 @@ void boardgfx_drawState(BoardGFX* board, BoardState* state)
     }
 }
 
-Square boardgfx_getGfxSq(BoardGFX* board, int x, int y)
+Square boardgfx_pxToGfxSq(BoardGFX* board, int x, int y)
 {
     int ox = x - board->px;
     int oy = y - board->py;
@@ -96,13 +96,19 @@ Square boardgfx_getGfxSq(BoardGFX* board, int x, int y)
     int sqX = ox / board->sqSize;
     int sqY = oy / board->sqSize;
 
+    if (board->isFlipped)
+    {
+        sqX = 7 - sqX;
+        sqY = 7 - sqY;
+    }
+
     return (Square){
         .x = sqX,
         .y = sqY
     };
 }
 
-Square boardgfx_stateSqToGfxSq(BoardGFX* board, int sq)
+Square boardgfx_stateSqToGfxSq(int sq)
 {
     // get mailbox (x, y)
     int mx = sq % MAILBOX_W;
@@ -111,13 +117,6 @@ Square boardgfx_stateSqToGfxSq(BoardGFX* board, int sq)
     // now convert mailbox coords to board coords
     int x = mx - MAILBOX_PADW;
     int y = my - MAILBOX_PADH;
-
-    // factor in the board being flipped
-    if (board->isFlipped)
-    {
-        x = BOARD_W - x - 1;
-        y = BOARD_H - y - 1;
-    }
     
     return (Square){
         .x = x,

@@ -4,9 +4,13 @@
 
 void indicator_draw(BoardGFX* board, Indicator* i)
 {
+    // convert to location of square graphically
+    Square loc = i->sq;
+    boardgfx_norm_sq(board, &loc);
+
     gfx_sprite_t* spr = 0;
-    int x = board->px + board->sqSize * i->sq.x;
-    int y = board->py + board->sqSize * i->sq.y;
+    int x = board->px + board->sqSize * loc.x;
+    int y = board->py + board->sqSize * loc.y;
     switch (i->type)
     {
         case Ind_Select:
@@ -35,7 +39,7 @@ void indicator_drawMoves(BoardGFX* board, Move* moves, int movesSize)
 
     for (int i = 0; i < movesSize; i++)
     {
-        ind.sq = boardgfx_stateSqToGfxSq(board, moves[i].to);
+        ind.sq = boardgfx_stateSqToGfxSq(moves[i].to);
         indicator_draw(board, &ind);
     }
 }

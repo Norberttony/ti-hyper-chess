@@ -25,10 +25,10 @@ void boardgfx_drawBg(BoardGFX* board);
 void boardgfx_drawState(BoardGFX* board, BoardState* state);
 
 // returns the square coordinates of pixel (x, y) graphically
-Square boardgfx_getGfxSq(BoardGFX* board, int x, int y);
+Square boardgfx_pxToGfxSq(BoardGFX* board, int x, int y);
 
 // turns a mailbox index into a gfx sq
-Square boardgfx_stateSqToGfxSq(BoardGFX* board, int sq);
+Square boardgfx_stateSqToGfxSq(int sq);
 
 // determines if the given square is out of bounds (assuming 8x8 board)
 int boardgfx_isSqOutOfBounds(Square sq);
