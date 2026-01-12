@@ -2,7 +2,7 @@
 
 #include "board-state.h"
 #include "board-gfx.h"
-#include "move-gen.h"
+#include "move.h"
 
 enum IndicatorType
 {

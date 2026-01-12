@@ -1,4 +1,4 @@
-#include "move-gen.h"
+#include "move.h"
 #include "defines.h"
 
 const int rookDirs[4] =
@@ -21,7 +21,7 @@ const int queenDirs[8] =
     -9      // up right
 };
 
-int gen_moves(BoardState* state, Move* list)
+int move_gen(BoardState* state, Move* list)
 {
     int size = 0;
 
@@ -29,13 +29,13 @@ int gen_moves(BoardState* state, Move* list)
     for (int i = 0; i < MAILBOX_W * MAILBOX_H; i++)
     {
         int val = state->mailbox[i];
-        size += gen_pieceMoves(state, list + size, i, val);
+        size += move_genPiece(state, list + size, i, val);
     }
 
     return size;
 }
 
-int gen_pieceMoves(BoardState* state, Move* list, int sq, int val)
+int move_genPiece(BoardState* state, Move* list, int sq, int val)
 {
     if (get_piece_side(val) != state->toPlay)
     {
@@ -44,14 +44,14 @@ int gen_pieceMoves(BoardState* state, Move* list, int sq, int val)
     switch (get_piece_type(val))
     {
         case straddler:
-            return gen_straddler(state, list, sq);
+            return move_genStraddler(state, list, sq);
 
         default:
             return 0;
     }
 }
 
-int gen_straddler(BoardState* state, Move* list, int sq)
+int move_genStraddler(BoardState* state, Move* list, int sq)
 {
     int side = get_piece_side(state->mailbox[sq]);
     int opp = get_opposing_side(side);

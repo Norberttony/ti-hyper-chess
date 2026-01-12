@@ -19,7 +19,7 @@ typedef struct Move
     int captsCount;
 } Move;
 
-int gen_moves(BoardState* state, Move* list);
-int gen_pieceMoves(BoardState* state, Move* list, int sq, int val);
+int move_gen(BoardState* state, Move* list);
+int move_genPiece(BoardState* state, Move* list, int sq, int val);
 
-int gen_straddler(BoardState* state, Move* list, int sq);
+int move_genStraddler(BoardState* state, Move* list, int sq);

@@ -8,7 +8,7 @@
 #include "cursor.h"
 #include "indicator.h"
 #include "gfx/gfx.h"
-#include "move-gen.h"
+#include "move.h"
 #include "defines.h"
 #include "input.h"
 #include "keypad-extras.h"

@@ -1,7 +1,7 @@
 #include "input.h"
 #include <keypadc.h>
 #include "keypad-extras.h"
-#include "move-gen.h"
+#include "move.h"
 
 void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to)
 {
@@ -56,7 +56,7 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
     {
         int mSq = board_to_mailbox(from->sq.x, from->sq.y);
         // update moves...
-        moveListSize = gen_pieceMoves(state, moveList, mSq, state->mailbox[mSq]);
+        moveListSize = move_genPiece(state, moveList, mSq, state->mailbox[mSq]);
     }
     else
     {
