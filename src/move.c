@@ -29,7 +29,7 @@ int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq);
 int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq);
 int8_t move_genKing(BoardState* state, Move* list, int8_t sq);
 
-static inline void set_piece_sq(BoardState* state, int8_t p, int8_t sq, int8_t side)
+static inline void set_piece_sq(BoardState* state, int8_t p, int8_t prevSq, int8_t sq, int8_t side)
 {
     switch (get_piece_type(p))
     {
@@ -41,6 +41,18 @@ static inline void set_piece_sq(BoardState* state, int8_t p, int8_t sq, int8_t s
             return;
         case coordinator:
             state->coordSq[side_to_index(side)] = sq;
+            return;
+        case chameleon:
+            (void)side;
+            uint8_t sti = side_to_cham_index(side);
+            if (state->chamSq[sti] == prevSq)
+            {
+                state->chamSq[sti] = sq;
+            }
+            else
+            {
+                state->chamSq[sti + 1] = sq;
+            }
             return;
         default:
             return;
@@ -60,8 +72,9 @@ void move_make(BoardState* state, Move* m)
     // captures
     for (int8_t i = 0; i < m->captsCount; i++)
     {
-        state->mailbox[m->capts[i].sq] = 0;
-        set_piece_sq(state, m->capts[i].piece, -1, notToPlay);
+        int sq = m->capts[i].sq;
+        state->mailbox[sq] = 0;
+        set_piece_sq(state, m->capts[i].piece, sq, -1, notToPlay);
     }
 
     // movement
@@ -70,7 +83,7 @@ void move_make(BoardState* state, Move* m)
     state->mailbox[m->from] = 0;
 
     // update square
-    set_piece_sq(state, val, m->to, state->toPlay);
+    set_piece_sq(state, val, m->from, m->to, state->toPlay);
 
     // toggle turn
     state->toPlay = notToPlay;
@@ -88,14 +101,14 @@ void move_unmake(BoardState* state, Move* m)
     state->mailbox[m->from] = val;
     state->mailbox[m->to] = 0;
 
-    set_piece_sq(state, val, m->from, state->toPlay);
+    set_piece_sq(state, val, m->to, m->from, state->toPlay);
 
     // uncaptures
     for (int8_t i = 0; i < m->captsCount; i++)
     {
         int8_t p = m->capts[i].piece;
         int8_t sq = m->capts[i].sq;
-        set_piece_sq(state, p, sq, notToPlay);
+        set_piece_sq(state, p, -1, sq, notToPlay);
         state->mailbox[sq] = p;
     }
 }
@@ -271,7 +284,7 @@ int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
             }
             continue;
         }
-        else if (mount == -1)
+        else if (mount != 0)
         {
             continue;
         }
@@ -312,10 +325,33 @@ int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq)
     return size;
 }
 
+static inline void move_genDeathSquares(BoardState* state, Move* m, uint8_t ox, uint8_t oy, int8_t idx, int8_t filter)
+{
+    uint8_t opp = get_opposing_side(state->toPlay);
+    uint8_t x = get_mailbox_x(idx);
+    uint8_t y = get_mailbox_y(idx);
+
+    int8_t dsqT[2] = {
+        x + oy * MAILBOX_W,
+        ox + y * MAILBOX_W
+    };
+
+    for (int8_t j = 0; j < 2; j++)
+    {
+        int8_t dsq = dsqT[j];
+        int8_t dval = state->mailbox[dsq];
+        if (dval > 0 && get_piece_side(dval) == opp && (!filter || filter == get_piece_type(dval)))
+        {
+            m->capts[m->captsCount].piece = dval;
+            m->capts[m->captsCount].sq = dsq;
+            m->captsCount++;
+        }
+    }
+}
+
 int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
 {
     int8_t toPlay = state->toPlay;
-    int8_t opp = get_opposing_side(toPlay);
     int8_t size = 0;
 
     int8_t kingSq = state->kingSq[side_to_index(toPlay)];
@@ -332,27 +368,7 @@ int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
             m->from = sq;
             m->to = idx;
 
-            uint8_t x = get_mailbox_x(idx);
-            uint8_t y = get_mailbox_y(idx);
-
-            int8_t dsqT[2] = {
-                x + kingY * MAILBOX_W,
-                kingX + y * MAILBOX_W
-            };
-
-            int8_t captsCount = 0;
-            for (int8_t j = 0; j < 2; j++)
-            {
-                int8_t dsq = dsqT[j];
-                int8_t dval = state->mailbox[dsq];
-                if (dval > 0 && get_piece_side(dval) == opp)
-                {
-                    m->capts[captsCount].piece = dval;
-                    m->capts[captsCount].sq = dsq;
-                    captsCount++;
-                }
-            }
-            m->captsCount = captsCount;
+            move_genDeathSquares(state, m, kingX, kingY, idx, 0);
 
             idx += d;
         }
@@ -370,12 +386,19 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
     uint8_t coordX = get_mailbox_x(coordSq);
     uint8_t coordY = get_mailbox_y(coordSq);
 
+    int8_t cham1Sq = state->chamSq[side_to_cham_index(toPlay)];
+    uint8_t cham1X = get_mailbox_x(cham1Sq);
+    uint8_t cham1Y = get_mailbox_y(cham1Sq);
+
+    int8_t cham2Sq = state->chamSq[side_to_cham_index(toPlay) + 1];
+    uint8_t cham2X = get_mailbox_x(cham2Sq);
+    uint8_t cham2Y = get_mailbox_y(cham2Sq);
+
     for (int8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
         int8_t idx = sq + d;
 
-        int8_t captsCount = 0;
         Move* m = 0;
 
         int8_t val = state->mailbox[idx];
@@ -385,6 +408,7 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
             m = list + size++;
             m->from = sq;
             m->to = idx;
+            m->captsCount = 0;
         }
         else if (val > 0 && get_piece_side(val) == opp)
         {
@@ -394,7 +418,7 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
             m->to = idx;
             m->capts[0].piece = val;
             m->capts[0].sq = idx;
-            captsCount++;
+            m->captsCount = 1;
         }
         else
         {
@@ -402,27 +426,11 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
         }
 
         // death squares with coordinator
-        uint8_t x = get_mailbox_x(idx);
-        uint8_t y = get_mailbox_y(idx);
+        move_genDeathSquares(state, m, coordX, coordY, idx, 0);
 
-        int8_t dsqT[2] = {
-            x + coordY * MAILBOX_W,
-            coordX + y * MAILBOX_W
-        };
-
-        for (int8_t j = 0; j < 2; j++)
-        {
-            int8_t dsq = dsqT[j];
-            int8_t dval = state->mailbox[dsq];
-            if (dval > 0 && get_piece_side(dval) == opp)
-            {
-                m->capts[captsCount].piece = dval;
-                m->capts[captsCount].sq = dsq;
-                captsCount++;
-            }
-        }
-
-        m->captsCount = captsCount;
+        // death squares with chameleon, only against coordinator
+        move_genDeathSquares(state, m, cham1X, cham1Y, idx, coordinator);
+        move_genDeathSquares(state, m, cham2X, cham2Y, idx, coordinator);
     }
 
     return size;

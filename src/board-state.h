@@ -22,6 +22,7 @@ typedef struct BoardState
     int8_t immSq[2];
     int8_t kingSq[2];
     int8_t coordSq[2];
+    int8_t chamSq[4];
 } BoardState;
 
 void state_init(BoardState* state);
@@ -52,7 +53,12 @@ static inline int8_t get_piece_side(int8_t piece)
     return piece & 0x8;
 }
 
-static inline int8_t side_to_index(int8_t side)
+static inline uint8_t side_to_index(uint8_t side)
 {
     return side >> 3;
+}
+
+static inline uint8_t side_to_cham_index(uint8_t side)
+{
+    return side >> 2;
 }
