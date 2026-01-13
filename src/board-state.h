@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 // dimensions of board
 #define BOARD_W 8
 #define BOARD_H 8
@@ -15,8 +17,8 @@
 typedef struct BoardState
 {
     // mailbox representation
-    int mailbox[MAILBOX_W * MAILBOX_H];
-    int toPlay;
+    int8_t mailbox[MAILBOX_W * MAILBOX_H];
+    int8_t toPlay;
 } BoardState;
 
 void state_init(BoardState* state);
@@ -27,12 +29,12 @@ static inline int board_to_mailbox(int x, int y)
     return x + MAILBOX_PADW + (y + MAILBOX_PADH) * MAILBOX_W;
 }
 
-static inline int get_piece_type(int piece)
+static inline int8_t get_piece_type(int8_t piece)
 {
     return piece & 0x7;
 }
 
-static inline int get_piece_side(int piece)
+static inline int8_t get_piece_side(int8_t piece)
 {
     return piece & 0x8;
 }

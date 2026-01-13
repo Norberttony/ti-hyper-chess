@@ -21,6 +21,38 @@ const int queenDirs[8] =
     -9      // up right
 };
 
+void move_make(BoardState* state, Move* m)
+{
+    // movement
+    state->mailbox[m->to] = state->mailbox[m->from];
+    state->mailbox[m->from] = 0;
+
+    // captures
+    for (int i = 0; i < m->captsCount; i++)
+    {
+        state->mailbox[m->capts[i].sq] = 0;
+    }
+
+    // toggle turn
+    state->toPlay = get_opposing_side(state->toPlay);
+}
+
+void move_unmake(BoardState* state, Move* m)
+{
+    // unmovement
+    state->mailbox[m->from] = state->mailbox[m->to];
+    state->mailbox[m->to] = 0;
+
+    // uncaptures
+    for (int i = 0; i < m->captsCount; i++)
+    {
+        state->mailbox[m->capts[i].sq] = m->capts[i].piece;
+    }
+
+    // toggle turn
+    state->toPlay = get_opposing_side(state->toPlay);
+}
+
 int move_gen(BoardState* state, Move* list)
 {
     int size = 0;

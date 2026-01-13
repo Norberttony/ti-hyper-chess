@@ -63,5 +63,31 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
         moveListSize = 0;
     }
 
-    indicator_drawMoves(board, moveList, moveListSize);
+    if (to->type == Ind_Selected)
+    {
+        int toSq = board_to_mailbox(to->sq.x, to->sq.y);
+
+        // check if this move exists and make it
+        Move* chosen = 0;
+        for (int i = 0; i < moveListSize; i++)
+        {
+            Move* m = moveList + i;
+            if (m->to == toSq)
+            {
+                chosen = m;
+                break;
+            }
+        }
+
+        if (chosen)
+        {
+            move_make(state, chosen);
+            from->type = Ind_Off;
+            to->type = Ind_Off;
+        }
+    }
+    else
+    {
+        indicator_drawMoves(board, moveList, moveListSize);
+    }
 }

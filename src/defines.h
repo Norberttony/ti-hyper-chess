@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 // sides
 enum
 {
@@ -33,7 +35,7 @@ enum
     a1 = 81, b1, c1, d1, e1, f1, g1, h1
 };
 
-static inline int get_opposing_side(int toPlay)
+static inline int8_t get_opposing_side(int8_t toPlay)
 {
     return !toPlay << 3;
 }
