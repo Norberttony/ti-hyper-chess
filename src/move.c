@@ -188,13 +188,13 @@ int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
                 int8_t next = idx + cd;
                 int8_t next2 = idx + 2 * cd;
                 int8_t nextVal = state->mailbox[next];
-                int8_t nextVal2 = state->mailbox[next2];
+                int8_t* nextVal2 = state->mailbox + next2;
                 if (
                     nextVal > 0 && get_piece_side(nextVal) != side && (
                         // normal straddler capture
-                        nextVal2 == (side | straddler) ||
+                        *nextVal2 == (side | straddler) ||
                         // OR chameleon-straddler capture...
-                        (nextVal2 == (side | chameleon) && nextVal == (opp | straddler))
+                        (*nextVal2 == (side | chameleon) && nextVal == (opp | straddler))
                     )
                 )
                 {
@@ -277,14 +277,14 @@ int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
                 m->captsCount = 1;
                 m->capts[0].piece = mount;
                 m->capts[0].sq = idx;
+                continue;
             }
             else
             {
                 m->captsCount = 0;
             }
-            continue;
         }
-        else if (mount != 0)
+        if (mount != 0)
         {
             continue;
         }
