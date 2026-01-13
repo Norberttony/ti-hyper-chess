@@ -19,6 +19,7 @@ typedef struct BoardState
     // mailbox representation
     int8_t mailbox[MAILBOX_W * MAILBOX_H];
     int8_t toPlay;
+    int8_t immSq[2];
 } BoardState;
 
 void state_init(BoardState* state);
@@ -37,4 +38,9 @@ static inline int8_t get_piece_type(int8_t piece)
 static inline int8_t get_piece_side(int8_t piece)
 {
     return piece & 0x8;
+}
+
+static inline int8_t side_to_index(int8_t side)
+{
+    return side >> 3;
 }

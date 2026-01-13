@@ -1,4 +1,5 @@
 #include "move.h"
+#include <stdlib.h>
 #include "defines.h"
 
 const int8_t rookDirs[4] =
@@ -24,37 +25,71 @@ const int8_t queenDirs[8] =
 int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq);
 int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq);
 int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq);
+int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq);
+
+static inline void set_piece_sq(BoardState* state, int8_t p, int8_t sq, int8_t side)
+{
+    switch (get_piece_type(p))
+    {
+        case immobilizer:
+            state->immSq[side_to_index(side)] = sq;
+            return;
+        default:
+            return;
+    }
+}
+
+static inline int8_t is_adjacent(int8_t sq1, int8_t sq2)
+{
+    uint8_t v = abs(sq1 - sq2);
+    return ((v >> 2) == 2 && (v & 0x3)) || v == 1;
+}
 
 void move_make(BoardState* state, Move* m)
 {
+    int8_t notToPlay = get_opposing_side(state->toPlay);
+
     // movement
-    state->mailbox[m->to] = state->mailbox[m->from];
+    int8_t val = state->mailbox[m->from];
+    state->mailbox[m->to] = val;
     state->mailbox[m->from] = 0;
 
     // captures
     for (int8_t i = 0; i < m->captsCount; i++)
     {
         state->mailbox[m->capts[i].sq] = 0;
+        set_piece_sq(state, m->capts[i].piece, -1, notToPlay);
     }
 
+    // update square
+    set_piece_sq(state, val, m->to, state->toPlay);
+
     // toggle turn
-    state->toPlay = get_opposing_side(state->toPlay);
+    state->toPlay = notToPlay;
 }
 
 void move_unmake(BoardState* state, Move* m)
 {
+    int8_t notToPlay = state->toPlay;
+
+    // toggle turn
+    state->toPlay = get_opposing_side(state->toPlay);
+
     // unmovement
-    state->mailbox[m->from] = state->mailbox[m->to];
+    int val = state->mailbox[m->to];
+    state->mailbox[m->from] = val;
     state->mailbox[m->to] = 0;
+
+    set_piece_sq(state, val, m->from, state->toPlay);
 
     // uncaptures
     for (int8_t i = 0; i < m->captsCount; i++)
     {
-        state->mailbox[m->capts[i].sq] = m->capts[i].piece;
+        int8_t p = m->capts[i].piece;
+        int8_t sq = m->capts[i].sq;
+        set_piece_sq(state, p, sq, notToPlay);
+        state->mailbox[sq] = p;
     }
-
-    // toggle turn
-    state->toPlay = get_opposing_side(state->toPlay);
 }
 
 int8_t move_gen(BoardState* state, Move* list)
@@ -73,10 +108,15 @@ int8_t move_gen(BoardState* state, Move* list)
 
 int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
 {
-    if (get_piece_side(val) != state->toPlay)
+    if (
+        val == 0 ||
+        get_piece_side(val) != state->toPlay ||
+        is_adjacent(sq, state->immSq[side_to_index(get_opposing_side(state->toPlay))])
+    )
     {
         return 0;
     }
+    
     switch (get_piece_type(val))
     {
         case straddler:
@@ -87,6 +127,9 @@ int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
 
         case retractor:
             return move_genRetractor(state, list, sq);
+
+        case immobilizer:
+            return move_genImmobilizer(state, list, sq);
 
         default:
             return 0;
@@ -120,7 +163,7 @@ int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
                 int8_t nextVal = state->mailbox[next];
                 int8_t nextVal2 = state->mailbox[next2];
                 if (
-                    nextVal > 0 && get_piece_type(nextVal) != side && (
+                    nextVal > 0 && get_piece_side(nextVal) != side && (
                         // normal straddler capture
                         nextVal2 == (side | straddler) ||
                         // OR chameleon-straddler capture...
@@ -232,5 +275,25 @@ int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
         }
     }
 
+    return size;
+}
+
+int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq)
+{
+    int8_t size = 0;
+    for (int8_t i = 0; i < 8; i++)
+    {
+        int8_t d = queenDirs[i];
+        int8_t idx = sq + d;
+        while (state->mailbox[idx] == 0)
+        {
+            Move* m = list + size++;
+            m->from = sq;
+            m->to = idx;
+            m->captsCount = 0;
+
+            idx += d;
+        }
+    }
     return size;
 }

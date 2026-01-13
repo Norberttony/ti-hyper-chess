@@ -56,4 +56,8 @@ void state_init(BoardState* state)
     state->mailbox[f1] = white | chameleon;
     state->mailbox[g1] = white | springer;
     state->mailbox[h1] = white | immobilizer;
+
+    // quick look ups
+    state->immSq[0] = h1;
+    state->immSq[1] = a8;
 }
