@@ -21,6 +21,11 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
         active = to;
     }
 
+    if (prev)
+    {
+        indicator_draw(board, prev);
+    }
+
     active->type = Ind_Select;
 
     Square sq = boardgfx_pxToGfxSq(board, cursor->x, cursor->y);
@@ -30,11 +35,6 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
         if (!prev || !boardgfx_areSquaresEqual(prev->sq, sq))
         {
             indicator_draw(board, active);
-        }
-
-        if (prev)
-        {
-            indicator_draw(board, prev);
         }
 
         if (key_wasJustPressed(kb_KeyEnter))
