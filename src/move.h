@@ -15,7 +15,7 @@ typedef struct Move
     // from and to are mailbox indices
     int8_t from;
     int8_t to;
-    PieceCapture capts[4];
+    PieceCapture capts[5];
     int8_t captsCount;
 } Move;
 

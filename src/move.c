@@ -27,6 +27,7 @@ int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq);
 int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq);
 int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq);
 int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq);
+int8_t move_genKing(BoardState* state, Move* list, int8_t sq);
 
 static inline void set_piece_sq(BoardState* state, int8_t p, int8_t sq, int8_t side)
 {
@@ -37,6 +38,9 @@ static inline void set_piece_sq(BoardState* state, int8_t p, int8_t sq, int8_t s
             return;
         case king:
             state->kingSq[side_to_index(side)] = sq;
+            return;
+        case coordinator:
+            state->coordSq[side_to_index(side)] = sq;
             return;
         default:
             return;
@@ -53,17 +57,17 @@ void move_make(BoardState* state, Move* m)
 {
     int8_t notToPlay = get_opposing_side(state->toPlay);
 
-    // movement
-    int8_t val = state->mailbox[m->from];
-    state->mailbox[m->to] = val;
-    state->mailbox[m->from] = 0;
-
     // captures
     for (int8_t i = 0; i < m->captsCount; i++)
     {
         state->mailbox[m->capts[i].sq] = 0;
         set_piece_sq(state, m->capts[i].piece, -1, notToPlay);
     }
+
+    // movement
+    int8_t val = state->mailbox[m->from];
+    state->mailbox[m->to] = val;
+    state->mailbox[m->from] = 0;
 
     // update square
     set_piece_sq(state, val, m->to, state->toPlay);
@@ -137,6 +141,9 @@ int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
 
         case coordinator:
             return move_genCoordinator(state, list, sq);
+
+        case king:
+            return move_genKing(state, list, sq);
 
         default:
             return 0;
@@ -324,7 +331,6 @@ int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
             Move* m = list + size++;
             m->from = sq;
             m->to = idx;
-            m->captsCount = 0;
 
             uint8_t x = get_mailbox_x(idx);
             uint8_t y = get_mailbox_y(idx);
@@ -334,20 +340,90 @@ int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
                 kingX + y * MAILBOX_W
             };
 
+            int8_t captsCount = 0;
             for (int8_t j = 0; j < 2; j++)
             {
                 int8_t dsq = dsqT[j];
                 int8_t dval = state->mailbox[dsq];
                 if (dval > 0 && get_piece_side(dval) == opp)
                 {
-                    m->captsCount++;
-                    m->capts[0].piece = dval;
-                    m->capts[0].sq = dsq;
+                    m->capts[captsCount].piece = dval;
+                    m->capts[captsCount].sq = dsq;
+                    captsCount++;
                 }
             }
+            m->captsCount = captsCount;
 
             idx += d;
         }
     }
+    return size;
+}
+
+int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
+{
+    int8_t toPlay = state->toPlay;
+    int8_t opp = get_opposing_side(toPlay);
+    int8_t size = 0;
+
+    int8_t coordSq = state->coordSq[side_to_index(toPlay)];
+    uint8_t coordX = get_mailbox_x(coordSq);
+    uint8_t coordY = get_mailbox_y(coordSq);
+
+    for (int8_t i = 0; i < 8; i++)
+    {
+        int8_t d = queenDirs[i];
+        int8_t idx = sq + d;
+
+        int8_t captsCount = 0;
+        Move* m = 0;
+
+        int8_t val = state->mailbox[idx];
+        if (val == 0)
+        {
+            // move to empty square
+            m = list + size++;
+            m->from = sq;
+            m->to = idx;
+        }
+        else if (val > 0 && get_piece_side(val) == opp)
+        {
+            // capture by displacement
+            m = list + size++;
+            m->from = sq;
+            m->to = idx;
+            m->capts[0].piece = val;
+            m->capts[0].sq = idx;
+            captsCount++;
+        }
+        else
+        {
+            continue;
+        }
+
+        // death squares with coordinator
+        uint8_t x = get_mailbox_x(idx);
+        uint8_t y = get_mailbox_y(idx);
+
+        int8_t dsqT[2] = {
+            x + coordY * MAILBOX_W,
+            coordX + y * MAILBOX_W
+        };
+
+        for (int8_t j = 0; j < 2; j++)
+        {
+            int8_t dsq = dsqT[j];
+            int8_t dval = state->mailbox[dsq];
+            if (dval > 0 && get_piece_side(dval) == opp)
+            {
+                m->capts[captsCount].piece = dval;
+                m->capts[captsCount].sq = dsq;
+                captsCount++;
+            }
+        }
+
+        m->captsCount = captsCount;
+    }
+
     return size;
 }

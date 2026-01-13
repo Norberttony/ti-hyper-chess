@@ -62,4 +62,6 @@ void state_init(BoardState* state)
     state->immSq[1] = a8;
     state->kingSq[0] = e1;
     state->kingSq[1] = e8;
+    state->coordSq[0] = a1;
+    state->coordSq[1] = h8;
 }

@@ -21,6 +21,7 @@ typedef struct BoardState
     int8_t toPlay;
     int8_t immSq[2];
     int8_t kingSq[2];
+    int8_t coordSq[2];
 } BoardState;
 
 void state_init(BoardState* state);
