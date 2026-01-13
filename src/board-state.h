@@ -20,6 +20,7 @@ typedef struct BoardState
     int8_t mailbox[MAILBOX_W * MAILBOX_H];
     int8_t toPlay;
     int8_t immSq[2];
+    int8_t kingSq[2];
 } BoardState;
 
 void state_init(BoardState* state);
@@ -28,6 +29,16 @@ void state_init(BoardState* state);
 static inline int board_to_mailbox(int x, int y)
 {
     return x + MAILBOX_PADW + (y + MAILBOX_PADH) * MAILBOX_W;
+}
+
+static inline uint8_t get_mailbox_x(uint8_t mIdx)
+{
+    return mIdx % 10;
+}
+
+static inline uint8_t get_mailbox_y(uint8_t mIdx)
+{
+    return mIdx / 10;
 }
 
 static inline int8_t get_piece_type(int8_t piece)

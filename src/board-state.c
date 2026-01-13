@@ -60,4 +60,6 @@ void state_init(BoardState* state)
     // quick look ups
     state->immSq[0] = h1;
     state->immSq[1] = a8;
+    state->kingSq[0] = e1;
+    state->kingSq[1] = e8;
 }
