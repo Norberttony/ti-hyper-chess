@@ -23,6 +23,7 @@ const int8_t queenDirs[8] =
 
 int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq);
 int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq);
+int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq);
 
 void move_make(BoardState* state, Move* m)
 {
@@ -83,6 +84,9 @@ int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
 
         case springer:
             return move_genSpringer(state, list, sq);
+
+        case retractor:
+            return move_genRetractor(state, list, sq);
 
         default:
             return 0;
@@ -158,8 +162,8 @@ int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq)
         }
 
         // determine if we can jump over this piece
-        int mount = state->mailbox[idx];
-        int jumpIdx = idx + d;
+        int8_t mount = state->mailbox[idx];
+        int8_t jumpIdx = idx + d;
         if (mount > 0 && get_piece_side(mount) == opp && state->mailbox[jumpIdx] == 0)
         {
             Move* m = list + size++;
@@ -170,6 +174,61 @@ int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq)
 
             m->capts[0].piece = mount;
             m->capts[0].sq = idx;
+        }
+    }
+
+    return size;
+}
+
+int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
+{
+    int8_t side = get_piece_side(state->mailbox[sq]);
+    int8_t opp = get_opposing_side(side);
+    int8_t size = 0;
+
+    for (int8_t i = 0; i < 8; i++)
+    {
+        int8_t d = queenDirs[i];
+        int8_t idx = sq + d;
+
+        // determine if we can move backwards in order to capture a piece
+        int8_t mount = state->mailbox[idx];
+        int8_t jumpIdx = sq - d;
+        int8_t jumpVal = state->mailbox[jumpIdx];
+        if (jumpVal == 0)
+        {
+            Move* m = list + size++;
+            
+            m->from = sq;
+            m->to = jumpIdx;
+
+            if (mount >= 0 && get_piece_side(mount) == opp)
+            {
+                m->captsCount = 1;
+                m->capts[0].piece = mount;
+                m->capts[0].sq = idx;
+            }
+            else
+            {
+                m->captsCount = 0;
+            }
+            continue;
+        }
+        else if (mount == -1)
+        {
+            continue;
+        }
+        idx += d;
+
+        while (state->mailbox[idx] == 0)
+        {
+            Move* m = list + size++;
+
+            m->from = sq;
+            m->to = idx;
+            m->captsCount = 0;
+
+            idx += d;
         }
     }
 
