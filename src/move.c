@@ -208,10 +208,39 @@ int8_t move_filterIllegal(BoardState* state, Move* list, int8_t size)
     return size;
 }
 
+void move_findStraddlerCaptures(BoardState* state, Move* m, int8_t idx)
+{
+    if (state->mailbox[idx] == -1)
+    {
+        return;
+    }
+    int8_t side = state->toPlay;
+    int8_t opp = get_opposing_side(state->toPlay);
+    for (int8_t c = 0; c < 4; c++)
+    {
+        int8_t cd = rookDirs[c];
+        int8_t next = idx + cd;
+        int8_t next2 = idx + 2 * cd;
+        int8_t nextVal = state->mailbox[next];
+        int8_t* nextVal2 = state->mailbox + next2;
+        if (
+            nextVal > 0 && get_piece_side(nextVal) != side && (
+                // normal straddler capture
+                *nextVal2 == (side | straddler) ||
+                // OR chameleon-straddler capture...
+                (*nextVal2 == (side | chameleon) && nextVal == (opp | straddler))
+            )
+        )
+        {
+            m->capts[m->captsCount].piece = nextVal;
+            m->capts[m->captsCount].sq = next;
+            m->captsCount++;
+        }
+    }
+}
+
 int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t side = get_piece_side(state->mailbox[sq]);
-    int8_t opp = get_opposing_side(side);
     int8_t size = 0;
 
     for (int8_t i = 0; i < 4; i++)
@@ -227,27 +256,8 @@ int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
             m->captsCount = 0;
 
             // generate captures
-            for (int8_t c = 0; c < 4; c++)
-            {
-                int8_t cd = rookDirs[c];
-                int8_t next = idx + cd;
-                int8_t next2 = idx + 2 * cd;
-                int8_t nextVal = state->mailbox[next];
-                int8_t* nextVal2 = state->mailbox + next2;
-                if (
-                    nextVal > 0 && get_piece_side(nextVal) != side && (
-                        // normal straddler capture
-                        *nextVal2 == (side | straddler) ||
-                        // OR chameleon-straddler capture...
-                        (*nextVal2 == (side | chameleon) && nextVal == (opp | straddler))
-                    )
-                )
-                {
-                    m->capts[m->captsCount].piece = nextVal;
-                    m->capts[m->captsCount].sq = next;
-                    m->captsCount++;
-                }
-            }
+            move_findStraddlerCaptures(state, m, idx);
+
             idx += d;
         }
     }
@@ -541,6 +551,9 @@ int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
             m->to = jumpIdx;
             m->captsCount = 0;
 
+            // to capture straddler must capture like straddler
+            move_findStraddlerCaptures(state, m, jumpIdx);
+
             // to capture coordinator must capture like coordinator
             if (kingSq > -1)
             {
@@ -592,27 +605,7 @@ int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
             // to capture straddler must capture like straddler...
             if ((i & 1) == 0)
             {
-                for (int8_t c = 0; c < 4; c++)
-                {
-                    int8_t cd = rookDirs[c];
-                    int8_t next = idx + cd;
-                    int8_t next2 = idx + 2 * cd;
-                    int8_t nextVal = state->mailbox[next];
-                    int8_t* nextVal2 = state->mailbox + next2;
-                    if (
-                        nextVal > 0 && nextVal == (opp | straddler) && (
-                            // normal chameleon capture
-                            *nextVal2 == (side | straddler) ||
-                            // OR chameleon-chameleon capture...
-                            *nextVal2 == (side | chameleon)
-                        )
-                    )
-                    {
-                        m->capts[m->captsCount].piece = nextVal;
-                        m->capts[m->captsCount].sq = next;
-                        m->captsCount++;
-                    }
-                }
+                move_findStraddlerCaptures(state, m, idx);
             }
 
             idx += d;
