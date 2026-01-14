@@ -32,14 +32,17 @@ void indicator_draw(BoardGFX* board, Indicator* i)
     gfx_TransparentSprite(spr, x, y);
 }
 
-void indicator_drawMoves(BoardGFX* board, Move* moves, int movesSize)
+void indicator_drawMoves(BoardGFX* board, BoardState* state, Move* moves, int movesSize)
 {
     Indicator ind = { 0 };
     ind.type = Ind_Move;
 
-    for (int i = 0; i < movesSize; i++)
+    for (int8_t i = 0; i < movesSize; i++)
     {
-        ind.sq = boardgfx_stateSqToGfxSq(moves[i].to);
-        indicator_draw(board, &ind);
+        if (move_isLegal(state, moves + i))
+        {
+            ind.sq = boardgfx_stateSqToGfxSq(moves[i].to);
+            indicator_draw(board, &ind);
+        }
     }
 }

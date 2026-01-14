@@ -1,6 +1,7 @@
 #include "board-gfx.h"
 #include <graphx.h>
 #include "gfx/gfx.h"
+#include "defines.h"
 
 gfx_sprite_t* pieceSprites[16] = {
     NULL,
@@ -46,7 +47,7 @@ void boardgfx_drawBg(BoardGFX* board)
 
 void boardgfx_drawPiece(BoardGFX* board, int x, int y, int piece)
 {
-    if (get_piece_type(piece) == 0)
+    if (piece <= 0 || piece > (black | king))
     {
         return;
     }

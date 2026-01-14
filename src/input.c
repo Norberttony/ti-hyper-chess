@@ -88,6 +88,6 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
     }
     else
     {
-        indicator_drawMoves(board, moveList, moveListSize);
+        indicator_drawMoves(board, state, moveList, moveListSize);
     }
 }

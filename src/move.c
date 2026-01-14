@@ -98,7 +98,7 @@ void move_unmake(BoardState* state, Move* m)
     state->toPlay = get_opposing_side(state->toPlay);
 
     // unmovement
-    int val = state->mailbox[m->to];
+    int8_t val = state->mailbox[m->to];
     state->mailbox[m->from] = val;
     state->mailbox[m->to] = 0;
 
@@ -131,7 +131,7 @@ int8_t move_gen(BoardState* state, Move* list)
 int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
 {
     if (
-        val == 0 ||
+        val <= 0 ||
         get_piece_side(val) != state->toPlay ||
         is_adjacent(sq, state->immSq[side_to_index(get_opposing_side(state->toPlay))])
     )
@@ -167,7 +167,7 @@ int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
     }
 }
 
-int move_isLegal(BoardState* state, Move* move)
+int8_t move_isLegal(BoardState* state, Move* move)
 {
     int8_t side = state->toPlay;
     move_make(state, move);
@@ -549,8 +549,8 @@ int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
             Move* m = list + size++;
             m->from = sq;
             m->to = jumpIdx;
-            m->capts[0].piece = mount;
-            m->capts[0].sq = idx;
+            m->capts[0].piece = jumpVal;
+            m->capts[0].sq = jumpIdx;
             m->captsCount = 1;
         }
         if (mount == 0)
