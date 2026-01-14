@@ -167,6 +167,29 @@ int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
     }
 }
 
+int move_isLegal(BoardState* state, Move* move)
+{
+    int8_t side = state->toPlay;
+    move_make(state, move);
+    // can the opponent take our king?
+    Move list[MAX_MOVES];
+    int8_t size = move_gen(state, list);
+    for (int8_t i = 0; i < size; i++)
+    {
+        Move* m = list + i;
+        for (int8_t c = 0; c < m->captsCount; c++)
+        {
+            if (m->capts[c].piece == (side | king))
+            {
+                move_unmake(state, move);
+                return 0;
+            }
+        }
+    }
+    move_unmake(state, move);
+    return 1;
+}
+
 int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
 {
     int8_t side = get_piece_side(state->mailbox[sq]);
