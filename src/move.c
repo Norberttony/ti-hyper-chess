@@ -73,9 +73,11 @@ void move_make(BoardState* state, Move* m)
     // captures
     for (int8_t i = 0; i < m->captsCount; i++)
     {
-        int sq = m->capts[i].sq;
+        int8_t sq = m->capts[i].sq;
+        int8_t p = m->capts[i].piece;
         state->mailbox[sq] = 0;
-        set_piece_sq(state, m->capts[i].piece, sq, -1, notToPlay);
+        set_piece_sq(state, p, sq, -1, notToPlay);
+        state->pieceCounts[side_to_index(notToPlay)][get_piece_type(p) - 1]--;
     }
 
     // movement
@@ -111,6 +113,7 @@ void move_unmake(BoardState* state, Move* m)
         int8_t sq = m->capts[i].sq;
         set_piece_sq(state, p, -1, sq, notToPlay);
         state->mailbox[sq] = p;
+        state->pieceCounts[side_to_index(notToPlay)][get_piece_type(p) - 1]++;
     }
 }
 

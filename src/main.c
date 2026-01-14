@@ -12,6 +12,7 @@
 #include "defines.h"
 #include "input.h"
 #include "keypad-extras.h"
+#include "engine.h"
 
 int main(void)
 {
@@ -29,7 +30,7 @@ int main(void)
         .sqSize = 29,
         .lightIdx = 2,
         .darkIdx = 1,
-        .isFlipped = 1
+        .isFlipped = 0
     };
 
     Cursor cursor = { 0 };
@@ -46,6 +47,17 @@ int main(void)
     key_update();
     while (!kb_IsDown(kb_KeyClear))
     {
+        if (state.toPlay == black)
+        {
+            gfx_FillScreen(255);
+            boardgfx_drawState(&board, &state);
+            gfx_SwapDraw();
+
+            // engine plays!
+            SearchResult r = thinkForDepth(&state, 3);
+            move_make(&state, r.bestMove);
+            prev = clock();
+        }
         int curr = clock();
         float diff = (float)(curr - prev) / CLOCKS_PER_SEC;
         prev = curr;

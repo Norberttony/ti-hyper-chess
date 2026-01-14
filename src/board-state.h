@@ -23,6 +23,7 @@ typedef struct BoardState
     int8_t kingSq[2];
     int8_t coordSq[2];
     int8_t chamSq[4];
+    uint8_t pieceCounts[2][7];
 } BoardState;
 
 void state_init(BoardState* state);
