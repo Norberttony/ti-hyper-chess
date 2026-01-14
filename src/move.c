@@ -190,6 +190,21 @@ int8_t move_isLegal(BoardState* state, Move* move)
     return 1;
 }
 
+int8_t move_filterIllegal(BoardState* state, Move* list, int8_t size)
+{
+    for (int8_t i = 0; i < size; i++)
+    {
+        if (!move_isLegal(state, list + i))
+        {
+            // this move is illegal and should be evaporated.
+            list[i] = list[--size];
+            i--;
+        }
+    }
+    // return new size
+    return size;
+}
+
 int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
 {
     int8_t side = get_piece_side(state->mailbox[sq]);

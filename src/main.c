@@ -35,6 +35,9 @@ int main(void)
     Cursor cursor = { 0 };
     cursor_init(&cursor, white_cursor);
 
+    Move cache[MAX_MOVES];
+    int8_t cacheSize = 0;
+
     Indicator from = { 0 };
     Indicator to = { 0 };
 
@@ -58,7 +61,7 @@ int main(void)
         gfx_FillScreen(255);
         boardgfx_drawState(&board, &state);
 
-        input_promptMoveStep(&cursor, &board, &state, &from, &to);
+        cacheSize = input_promptMoveStep(&cursor, &board, &state, &from, &to, cache, cacheSize);
 
         // move and draw cursor
         cursor_readInput(&cursor, 100.0f * diff);

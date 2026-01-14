@@ -3,11 +3,8 @@
 #include "keypad-extras.h"
 #include "move.h"
 
-void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to)
+int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to, Move* cache, int8_t cacheSize)
 {
-    Move moveList[MAX_MOVES];
-    int moveListSize = 0;
-
     // determine which indicator user is deciding for...
     Indicator* active = 0;
     Indicator* prev = 0;
@@ -54,13 +51,18 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
 
     if (from->type == Ind_Selected)
     {
-        int mSq = board_to_mailbox(from->sq.x, from->sq.y);
-        // update moves...
-        moveListSize = move_genPiece(state, moveList, mSq, state->mailbox[mSq]);
+        // was "from" just selected?
+        if (active == from)
+        {
+            // update moves only when necessary
+            int mSq = board_to_mailbox(from->sq.x, from->sq.y);
+            cacheSize = move_genPiece(state, cache, mSq, state->mailbox[mSq]);
+            cacheSize = move_filterIllegal(state, cache, cacheSize);
+        }
     }
     else
     {
-        moveListSize = 0;
+        cacheSize = 0;
     }
 
     if (to->type == Ind_Selected)
@@ -69,9 +71,9 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
 
         // check if this move exists and make it
         Move* chosen = 0;
-        for (int i = 0; i < moveListSize; i++)
+        for (int i = 0; i < cacheSize; i++)
         {
-            Move* m = moveList + i;
+            Move* m = cache + i;
             if (m->to == toSq)
             {
                 chosen = m;
@@ -88,6 +90,8 @@ void input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, In
     }
     else
     {
-        indicator_drawMoves(board, state, moveList, moveListSize);
+        indicator_drawMoves(board, cache, cacheSize);
     }
+
+    return cacheSize;
 }
