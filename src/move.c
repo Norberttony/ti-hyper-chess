@@ -362,6 +362,14 @@ int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
     uint8_t kingX = get_mailbox_x(kingSq);
     uint8_t kingY = get_mailbox_y(kingSq);
 
+    int8_t cham1Sq = state->chamSq[side_to_cham_index(toPlay)];
+    uint8_t cham1X = get_mailbox_x(cham1Sq);
+    uint8_t cham1Y = get_mailbox_y(cham1Sq);
+
+    int8_t cham2Sq = state->chamSq[side_to_cham_index(toPlay) + 1];
+    uint8_t cham2X = get_mailbox_x(cham2Sq);
+    uint8_t cham2Y = get_mailbox_y(cham2Sq);
+
     for (int8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
@@ -371,8 +379,20 @@ int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
             Move* m = list + size++;
             m->from = sq;
             m->to = idx;
+            m->captsCount = 0;
 
-            move_genDeathSquares(state, m, kingX, kingY, idx, 0);
+            if (kingSq > -1)
+            {
+                move_genDeathSquares(state, m, kingX, kingY, idx, 0);
+            }
+            if (cham1Sq > -1)
+            {
+                move_genDeathSquares(state, m, cham1X, cham1Y, idx, king);
+            }
+            if (cham2Sq > -1)
+            {
+                move_genDeathSquares(state, m, cham2X, cham2Y, idx, king);
+            }
 
             idx += d;
         }
@@ -430,11 +450,20 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
         }
 
         // death squares with coordinator
-        move_genDeathSquares(state, m, coordX, coordY, idx, 0);
+        if (coordSq > -1)
+        {
+            move_genDeathSquares(state, m, coordX, coordY, idx, 0);
+        }
 
         // death squares with chameleon, only against coordinator
-        move_genDeathSquares(state, m, cham1X, cham1Y, idx, coordinator);
-        move_genDeathSquares(state, m, cham2X, cham2Y, idx, coordinator);
+        if (cham1Sq > -1)
+        {
+            move_genDeathSquares(state, m, cham1X, cham1Y, idx, coordinator);
+        }
+        if (cham2Sq > -1)
+        {
+            move_genDeathSquares(state, m, cham2X, cham2Y, idx, coordinator);
+        }
     }
 
     return size;
@@ -472,10 +501,16 @@ int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
             m->captsCount = 0;
 
             // to capture coordinator must capture like coordinator
-            move_genDeathSquares(state, m, kingX, kingY, jumpIdx, coordinator);
+            if (kingSq > -1)
+            {
+                move_genDeathSquares(state, m, kingX, kingY, jumpIdx, coordinator);
+            }
 
             // to capture king must capture like king...
-            move_genDeathSquares(state, m, coordX, coordY, jumpIdx, king);
+            if (coordSq > -1)
+            {
+                move_genDeathSquares(state, m, coordX, coordY, jumpIdx, king);
+            }
 
             if (mount == (opp | retractor))
             {
@@ -508,7 +543,10 @@ int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
             m->captsCount = 0;
 
             // to capture coordinator must capture like coordinator...
-            move_genDeathSquares(state, m, kingX, kingY, idx, coordinator);
+            if (coordSq > -1)
+            {
+                move_genDeathSquares(state, m, kingX, kingY, idx, coordinator);
+            }
 
             // to capture straddler must capture like straddler...
             if ((i & 1) == 0)
