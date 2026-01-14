@@ -28,6 +28,7 @@ int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq);
 int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq);
 int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq);
 int8_t move_genKing(BoardState* state, Move* list, int8_t sq);
+int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq);
 
 static inline void set_piece_sq(BoardState* state, int8_t p, int8_t prevSq, int8_t sq, int8_t side)
 {
@@ -157,6 +158,9 @@ int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
 
         case king:
             return move_genKing(state, list, sq);
+
+        case chameleon:
+            return move_genChameleon(state, list, sq);
 
         default:
             return 0;
@@ -431,6 +435,122 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
         // death squares with chameleon, only against coordinator
         move_genDeathSquares(state, m, cham1X, cham1Y, idx, coordinator);
         move_genDeathSquares(state, m, cham2X, cham2Y, idx, coordinator);
+    }
+
+    return size;
+}
+
+int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
+{
+    int8_t side = get_piece_side(state->mailbox[sq]);
+    int8_t opp = get_opposing_side(side);
+    int8_t size = 0;
+
+    int8_t coordSq = state->coordSq[side_to_index(side)];
+    uint8_t coordX = get_mailbox_x(coordSq);
+    uint8_t coordY = get_mailbox_y(coordSq);
+
+    int8_t kingSq = state->kingSq[side_to_index(side)];
+    uint8_t kingX = get_mailbox_x(kingSq);
+    uint8_t kingY = get_mailbox_y(kingSq);
+
+    for (int8_t i = 0; i < 8; i++)
+    {
+        int8_t d = queenDirs[i];
+        int8_t idx = sq + d;
+
+        // to capture retractor must capture like retractor...
+        int8_t mount = state->mailbox[idx];
+        int8_t jumpIdx = sq - d;
+        int8_t jumpVal = state->mailbox[jumpIdx];
+        if (jumpVal == 0)
+        {
+            Move* m = list + size++;
+            
+            m->from = sq;
+            m->to = jumpIdx;
+            m->captsCount = 0;
+
+            // to capture coordinator must capture like coordinator
+            move_genDeathSquares(state, m, kingX, kingY, jumpIdx, coordinator);
+
+            // to capture king must capture like king...
+            move_genDeathSquares(state, m, coordX, coordY, jumpIdx, king);
+
+            if (mount == (opp | retractor))
+            {
+                m->capts[m->captsCount].piece = mount;
+                m->capts[m->captsCount].sq = idx;
+                m->captsCount++;
+                continue;
+            }
+        }
+        else if (jumpVal == (opp | king))
+        {
+            // to capture king must capture like king...
+            Move* m = list + size++;
+            m->from = sq;
+            m->to = jumpIdx;
+            m->capts[0].piece = mount;
+            m->capts[0].sq = idx;
+            m->captsCount = 1;
+        }
+        if (mount == 0)
+        {
+            idx += d;
+        }
+        
+        while (state->mailbox[idx] == 0)
+        {
+            Move* m = list + size++;
+            m->from = sq;
+            m->to = idx;
+            m->captsCount = 0;
+
+            // to capture coordinator must capture like coordinator...
+            move_genDeathSquares(state, m, kingX, kingY, idx, coordinator);
+
+            // to capture straddler must capture like straddler...
+            if ((i & 1) == 0)
+            {
+                for (int8_t c = 0; c < 4; c++)
+                {
+                    int8_t cd = rookDirs[c];
+                    int8_t next = idx + cd;
+                    int8_t next2 = idx + 2 * cd;
+                    int8_t nextVal = state->mailbox[next];
+                    int8_t* nextVal2 = state->mailbox + next2;
+                    if (
+                        nextVal > 0 && nextVal == (opp | straddler) && (
+                            // normal chameleon capture
+                            *nextVal2 == (side | straddler) ||
+                            // OR chameleon-chameleon capture...
+                            *nextVal2 == (side | chameleon)
+                        )
+                    )
+                    {
+                        m->capts[m->captsCount].piece = nextVal;
+                        m->capts[m->captsCount].sq = next;
+                        m->captsCount++;
+                    }
+                }
+            }
+
+            idx += d;
+        }
+
+        mount = state->mailbox[idx];
+        jumpIdx = idx + d;
+        if (mount == (opp | springer) && state->mailbox[jumpIdx] == 0)
+        {
+            // to capture springer must capture like springer...
+            Move* m = list + size++;
+            m->from = sq;
+            m->to = jumpIdx;
+            m->capts[0].piece = mount;
+            m->capts[0].sq = idx;
+            m->captsCount = 1;
+        }
     }
 
     return size;
