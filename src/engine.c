@@ -17,6 +17,27 @@ int pieceValues[7] =
     99999
 };
 
+void orderMoves(Move* list, uint8_t size)
+{
+    // move captures to the start
+    int firstNonCaptIdx = 0;
+    for (uint8_t i = 0; i < size; i++)
+    {
+        Move* m = list + i;
+        if (m->captsCount > 0)
+        {
+            if (i != firstNonCaptIdx)
+            {
+                // swap this capture with the first non-capture.
+                Move temp = *m;
+                *m = *(list + firstNonCaptIdx);
+                *(list + firstNonCaptIdx) = temp;
+            }
+            firstNonCaptIdx++;
+        }
+    }
+}
+
 int evaluate(BoardState* state)
 {
     int8_t persp = side_to_perspective(state->toPlay);
@@ -40,12 +61,15 @@ int thinkCaptures(BoardState* state, int alpha, int beta)
 
     Move list[MAX_MOVES];
     int8_t size = move_gen(state, list);
+
+    orderMoves(list, size);
+
     for (int8_t i = 0; i < size; i++)
     {
         Move* m = list + i;
         if (m->captsCount == 0)
         {
-            continue;
+            break;
         }
 
         move_make(state, m);
@@ -77,6 +101,9 @@ int think(BoardState* state, int alpha, int beta, int8_t depth, uint8_t isRoot)
     // generate moves...
     Move list[MAX_MOVES];
     int8_t size = move_gen(state, list);
+
+    orderMoves(list, size);
+
     for (int8_t i = 0; i < size; i++)
     {
         Move* m = list + i;
