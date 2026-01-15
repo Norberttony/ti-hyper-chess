@@ -74,6 +74,11 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
         if (state.res == Result_Ongoing)
         {
             cacheSize = input_promptMoveStep(&cursor, &board, &state, &from, &to, cache, cacheSize);
+            if (!isAgainstEngine)
+            {
+                // flip the board to match whose turn it is
+                board.isFlipped = state.toPlay == white ? 0 : 1;
+            }
         }
 
         // move and draw cursor
