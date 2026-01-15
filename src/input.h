@@ -10,3 +10,6 @@
 
 // prompts the user for a move
 int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to, Move* cache, int8_t cacheSize);
+
+// the loop for handling displaying one board onto the screen with user input.
+void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide);
