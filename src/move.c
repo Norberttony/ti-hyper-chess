@@ -23,13 +23,13 @@ const int8_t queenDirs[8] =
     -9      // up right
 };
 
-int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq);
-int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq);
-int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq);
-int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq);
-int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq);
-int8_t move_genKing(BoardState* state, Move* list, int8_t sq);
-int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq);
+uint8_t move_genStraddler(BoardState* state, Move* list, int8_t sq);
+uint8_t move_genSpringer(BoardState* state, Move* list, int8_t sq);
+uint8_t move_genRetractor(BoardState* state, Move* list, int8_t sq);
+uint8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq);
+uint8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq);
+uint8_t move_genKing(BoardState* state, Move* list, int8_t sq);
+uint8_t move_genChameleon(BoardState* state, Move* list, int8_t sq);
 
 static inline void set_piece_sq(BoardState* state, int8_t p, int8_t prevSq, int8_t sq, int8_t side)
 {
@@ -61,7 +61,7 @@ static inline void set_piece_sq(BoardState* state, int8_t p, int8_t prevSq, int8
     }
 }
 
-static inline int8_t is_adjacent(int8_t sq1, int8_t sq2)
+static inline uint8_t __attribute__((always_inline)) is_adjacent(int8_t sq1, int8_t sq2)
 {
     uint8_t v = abs(sq1 - sq2);
     return ((v >> 2) == 2 && (v & 0x3)) || v == 1;
@@ -197,9 +197,9 @@ int8_t move_isLegal(BoardState* state, Move* move)
     return 1;
 }
 
-int8_t move_filterIllegal(BoardState* state, Move* list, int8_t size)
+uint8_t move_filterIllegal(BoardState* state, Move* list, uint8_t size)
 {
-    for (int8_t i = 0; i < size; i++)
+    for (uint8_t i = 0; i < size; i++)
     {
         if (!move_isLegal(state, list + i))
         {
@@ -252,9 +252,9 @@ void move_findStraddlerCaptures(BoardState* state, Move* m, int8_t idx, uint8_t 
     {
         return;
     }
-    int8_t side = state->toPlay;
-    int8_t opp = get_opposing_side(state->toPlay);
-    for (int8_t c = 0; c < 4; c++)
+    uint8_t side = state->toPlay;
+    uint8_t opp = get_opposing_side(state->toPlay);
+    for (uint8_t c = 0; c < 4; c++)
     {
         int8_t cd = rookDirs[c];
         int8_t next = idx + cd;
@@ -280,11 +280,11 @@ void move_findStraddlerCaptures(BoardState* state, Move* m, int8_t idx, uint8_t 
     }
 }
 
-int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
+uint8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t size = 0;
+    uint8_t size = 0;
 
-    for (int8_t i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
         int8_t d = rookDirs[i];
         int8_t idx = sq + d;
@@ -306,13 +306,13 @@ int8_t move_genStraddler(BoardState* state, Move* list, int8_t sq)
     return size;
 }
 
-int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq)
+uint8_t move_genSpringer(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t side = get_piece_side(state->mailbox[sq]);
-    int8_t opp = get_opposing_side(side);
-    int8_t size = 0;
+    uint8_t side = get_piece_side(state->mailbox[sq]);
+    uint8_t opp = get_opposing_side(side);
+    uint8_t size = 0;
 
-    for (int8_t i = 0; i < 8; i++)
+    for (uint8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
         int8_t idx = sq + d;
@@ -346,13 +346,13 @@ int8_t move_genSpringer(BoardState* state, Move* list, int8_t sq)
     return size;
 }
 
-int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
+uint8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t side = get_piece_side(state->mailbox[sq]);
-    int8_t opp = get_opposing_side(side);
-    int8_t size = 0;
+    uint8_t side = get_piece_side(state->mailbox[sq]);
+    uint8_t opp = get_opposing_side(side);
+    uint8_t size = 0;
 
-    for (int8_t i = 0; i < 8; i++)
+    for (uint8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
         int8_t idx = sq + d;
@@ -401,9 +401,17 @@ int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
     return size;
 }
 
-int8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq)
+uint8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t size = 0;
+    uint8_t opp = get_opposing_side(state->toPlay);
+    uint8_t nsti = side_to_cham_index(opp);
+    
+    if (is_adjacent(state->chamSq[nsti], sq) || is_adjacent(state->chamSq[nsti + 1], sq))
+    {
+        return 0;
+    }
+
+    uint8_t size = 0;
     for (int8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
@@ -445,10 +453,10 @@ static inline void move_genDeathSquares(BoardState* state, Move* m, uint8_t ox, 
     }
 }
 
-int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
+uint8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t toPlay = state->toPlay;
-    int8_t size = 0;
+    uint8_t toPlay = state->toPlay;
+    uint8_t size = 0;
 
     int8_t kingSq = state->kingSq[side_to_index(toPlay)];
     uint8_t kingX = get_mailbox_x(kingSq);
@@ -462,7 +470,7 @@ int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
     uint8_t cham2X = get_mailbox_x(cham2Sq);
     uint8_t cham2Y = get_mailbox_y(cham2Sq);
 
-    for (int8_t i = 0; i < 8; i++)
+    for (uint8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
         int8_t idx = sq + d;
@@ -492,11 +500,11 @@ int8_t move_genCoordinator(BoardState* state, Move* list, int8_t sq)
     return size;
 }
 
-int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
+uint8_t move_genKing(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t toPlay = state->toPlay;
-    int8_t opp = get_opposing_side(toPlay);
-    int8_t size = 0;
+    uint8_t toPlay = state->toPlay;
+    uint8_t opp = get_opposing_side(toPlay);
+    uint8_t size = 0;
 
     int8_t coordSq = state->coordSq[side_to_index(toPlay)];
     uint8_t coordX = get_mailbox_x(coordSq);
@@ -510,7 +518,7 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
     uint8_t cham2X = get_mailbox_x(cham2Sq);
     uint8_t cham2Y = get_mailbox_y(cham2Sq);
 
-    for (int8_t i = 0; i < 8; i++)
+    for (uint8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
         int8_t idx = sq + d;
@@ -561,11 +569,11 @@ int8_t move_genKing(BoardState* state, Move* list, int8_t sq)
     return size;
 }
 
-int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
+uint8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
 {
-    int8_t side = get_piece_side(state->mailbox[sq]);
-    int8_t opp = get_opposing_side(side);
-    int8_t size = 0;
+    uint8_t side = get_piece_side(state->mailbox[sq]);
+    uint8_t opp = get_opposing_side(side);
+    uint8_t size = 0;
 
     int8_t coordSq = state->coordSq[side_to_index(side)];
     uint8_t coordX = get_mailbox_x(coordSq);
@@ -575,7 +583,7 @@ int8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
     uint8_t kingX = get_mailbox_x(kingSq);
     uint8_t kingY = get_mailbox_y(kingSq);
 
-    for (int8_t i = 0; i < 8; i++)
+    for (uint8_t i = 0; i < 8; i++)
     {
         int8_t d = queenDirs[i];
         int8_t idx = sq + d;
