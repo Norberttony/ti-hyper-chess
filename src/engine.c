@@ -67,6 +67,12 @@ int thinkCaptures(BoardState* state, int alpha, int beta)
     for (int8_t i = 0; i < size; i++)
     {
         Move* m = list + i;
+        int myVal = pieceValues[get_piece_type(state->mailbox[m->from]) - 1];
+        int enemVal = pieceValues[get_piece_type(state->mailbox[m->capts[0].piece]) - 1];
+        if (myVal > enemVal)
+        {
+            continue;
+        }
         if (m->captsCount == 0)
         {
             break;
