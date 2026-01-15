@@ -8,8 +8,8 @@ enum IndicatorType
     Ind_Off,
     Ind_Select,
     Ind_Selected,
-    Ind_Move,
-    Ind_Capture
+    Ind_WhiteMove,
+    Ind_BlackMove
 };
 
 typedef struct Indicator
@@ -19,4 +19,4 @@ typedef struct Indicator
 } Indicator;
 
 void indicator_draw(BoardGFX* board, Indicator* i);
-void indicator_drawMoves(BoardGFX* board, Move* moves, int movesSize);
+void indicator_drawMoves(BoardGFX* board, Move* moves, uint8_t movesSize, uint8_t side);

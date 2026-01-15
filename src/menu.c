@@ -18,9 +18,9 @@ typedef struct Screen
 } Screen;
 
 // color indices
-#define BUTTON_BG 24
+#define BUTTON_BG 93
 #define TEXT_FG 4
-#define BUTTON_SEL 31
+#define BUTTON_SEL 119
 
 // in pixels
 #define BUTTON_W 100

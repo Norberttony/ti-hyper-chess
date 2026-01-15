@@ -172,7 +172,7 @@ int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, 
     }
     else
     {
-        indicator_drawMoves(board, cache, cacheSize);
+        indicator_drawMoves(board, cache, cacheSize, state->toPlay);
     }
 
     return cacheSize;

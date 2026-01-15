@@ -22,8 +22,8 @@ typedef struct Move
 void move_make(BoardState* state, Move* m);
 void move_unmake(BoardState* state, Move* m);
 
-int8_t move_gen(BoardState* state, Move* list);
-int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val);
+uint8_t move_gen(BoardState* state, Move* list);
+uint8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val);
 
 int8_t move_isLegal(BoardState* state, Move* move);
 int8_t move_filterIllegal(BoardState* state, Move* list, int8_t size);

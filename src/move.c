@@ -121,9 +121,9 @@ void move_unmake(BoardState* state, Move* m)
     }
 }
 
-int8_t move_gen(BoardState* state, Move* list)
+uint8_t move_gen(BoardState* state, Move* list)
 {
-    int8_t size = 0;
+    uint8_t size = 0;
 
     // go through each square...
     for (int8_t i = 0; i < MAILBOX_W * MAILBOX_H; i++)
@@ -135,7 +135,7 @@ int8_t move_gen(BoardState* state, Move* list)
     return size;
 }
 
-int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
+uint8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val)
 {
     if (
         val <= 0 ||
@@ -229,13 +229,12 @@ enum Result move_isGameOver(BoardState* state)
 
     // no moves! is our king under attack?
     state->toPlay = get_opposing_side(state->toPlay);
-    Move list2[MAX_MOVES];
-    uint8_t size2 = move_gen(state, list2);
-    for (uint8_t i = 0; i < size2; i++)
+    size = move_gen(state, list);
+    for (uint8_t i = 0; i < size; i++)
     {
         for (uint8_t c = 0; c < 4; c++)
         {
-            if (list2[i].capts[c].piece == (side | king))
+            if (list[i].capts[c].piece == (side | king))
             {
                 return Result_Checkmate;
             }

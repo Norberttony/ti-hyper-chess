@@ -1,4 +1,5 @@
 #include "engine.h"
+#include <stdlib.h>
 #include <debug.h>
 #include <time.h>
 #include "defines.h"
@@ -59,7 +60,7 @@ int thinkCaptures(BoardState* state, int alpha, int beta)
         alpha = score;
     }
 
-    Move list[MAX_MOVES];
+    Move* list = (Move*)malloc(MAX_MOVES * sizeof(Move));
     int8_t size = move_gen(state, list);
 
     orderMoves(list, size);
@@ -84,6 +85,7 @@ int thinkCaptures(BoardState* state, int alpha, int beta)
 
         if (score >= beta)
         {
+            free(list);
             return beta;
         }
 
@@ -93,6 +95,7 @@ int thinkCaptures(BoardState* state, int alpha, int beta)
         }
     }
 
+    free(list);
     return alpha;
 }
 
@@ -109,7 +112,7 @@ int think(BoardState* state, int alpha, int beta, int8_t depth, uint8_t isRoot)
     nodesVisited++;
 
     // generate moves...
-    Move list[MAX_MOVES];
+    Move* list = (Move*)malloc(MAX_MOVES * sizeof(Move));
     int8_t size = move_gen(state, list);
 
     orderMoves(list, size);
@@ -123,6 +126,7 @@ int think(BoardState* state, int alpha, int beta, int8_t depth, uint8_t isRoot)
 
         if (score >= beta)
         {
+            free(list);
             return beta;
         }
 
@@ -137,6 +141,7 @@ int think(BoardState* state, int alpha, int beta, int8_t depth, uint8_t isRoot)
         }
     }
 
+    free(list);
     return alpha;
 }
 
