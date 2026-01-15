@@ -97,10 +97,11 @@ void move_make(BoardState* state, Move* m)
 void move_unmake(BoardState* state, Move* m)
 {
     int8_t notToPlay = state->toPlay;
-    int8_t persp = side_to_perspective(state->toPlay);
-
+    
     // toggle turn
     state->toPlay = get_opposing_side(state->toPlay);
+
+    int8_t persp = side_to_perspective(state->toPlay);
 
     // unmovement
     int8_t val = state->mailbox[m->to];
@@ -330,7 +331,7 @@ int8_t move_genRetractor(BoardState* state, Move* list, int8_t sq)
             m->from = sq;
             m->to = jumpIdx;
 
-            if (mount >= 0 && get_piece_side(mount) == opp)
+            if (mount > 0 && get_piece_side(mount) == opp)
             {
                 m->captsCount = 1;
                 m->capts[0].piece = mount;
