@@ -1,6 +1,7 @@
 #include "move.h"
 #include <stdlib.h>
 #include "defines.h"
+#include "engine.h"
 
 const int8_t rookDirs[4] =
 {
@@ -69,6 +70,7 @@ static inline int8_t is_adjacent(int8_t sq1, int8_t sq2)
 void move_make(BoardState* state, Move* m)
 {
     int8_t notToPlay = get_opposing_side(state->toPlay);
+    int8_t persp = side_to_perspective(state->toPlay);
 
     // captures
     for (int8_t i = 0; i < m->captsCount; i++)
@@ -77,7 +79,7 @@ void move_make(BoardState* state, Move* m)
         int8_t p = m->capts[i].piece;
         state->mailbox[sq] = 0;
         set_piece_sq(state, p, sq, -1, notToPlay);
-        state->pieceCounts[side_to_index(notToPlay)][get_piece_type(p) - 1]--;
+        state->materialScore += persp * pieceValues[get_piece_type(p) - 1];
     }
 
     // movement
@@ -95,6 +97,7 @@ void move_make(BoardState* state, Move* m)
 void move_unmake(BoardState* state, Move* m)
 {
     int8_t notToPlay = state->toPlay;
+    int8_t persp = side_to_perspective(state->toPlay);
 
     // toggle turn
     state->toPlay = get_opposing_side(state->toPlay);
@@ -113,7 +116,7 @@ void move_unmake(BoardState* state, Move* m)
         int8_t sq = m->capts[i].sq;
         set_piece_sq(state, p, -1, sq, notToPlay);
         state->mailbox[sq] = p;
-        state->pieceCounts[side_to_index(notToPlay)][get_piece_type(p) - 1]++;
+        state->materialScore -= persp * pieceValues[get_piece_type(p) - 1];
     }
 }
 

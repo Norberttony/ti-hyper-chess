@@ -3,6 +3,8 @@
 #include "move.h"
 #include "board-state.h"
 
+extern int pieceValues[7];
+
 typedef struct SearchResult
 {
     int score;

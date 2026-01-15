@@ -4,7 +4,8 @@
 
 static Move bestMove;
 
-int pieceValues[7] = {
+int pieceValues[7] =
+{
     100,
     300,
     400,
@@ -16,16 +17,8 @@ int pieceValues[7] = {
 
 int evaluate(BoardState* state)
 {
-    int score = 0;
-    int8_t sti = side_to_index(state->toPlay);
-    int8_t nsti = side_to_index(get_opposing_side(state->toPlay));
-
-    // loop through all pieces and count up their material
-    for (int8_t i = straddler; i <= king; i++)
-    {
-        score += pieceValues[i - 1] * state->pieceCounts[sti][i - 1];
-        score -= pieceValues[i - 1] * state->pieceCounts[nsti][i - 1];
-    }
+    int8_t persp = side_to_perspective(state->toPlay);
+    int score = persp * state->materialScore;
 
     return score;
 }

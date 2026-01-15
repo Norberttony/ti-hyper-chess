@@ -23,7 +23,9 @@ typedef struct BoardState
     int8_t kingSq[2];
     int8_t coordSq[2];
     int8_t chamSq[4];
-    uint8_t pieceCounts[2][7];
+
+    // material score from white's perspective
+    int materialScore;
 } BoardState;
 
 void state_init(BoardState* state);
@@ -62,4 +64,9 @@ static inline uint8_t side_to_index(uint8_t side)
 static inline uint8_t side_to_cham_index(uint8_t side)
 {
     return side >> 2;
+}
+
+static inline int8_t side_to_perspective(uint8_t side)
+{
+    return -(int8_t)(side >> 2) + 1;
 }

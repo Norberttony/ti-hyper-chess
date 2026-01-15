@@ -69,14 +69,5 @@ void state_init(BoardState* state)
     state->chamSq[2] = c8;
     state->chamSq[3] = f8;
 
-    for (int8_t i = 0; i < 2; i++)
-    {
-        state->pieceCounts[i][straddler - 1] = 8;
-        state->pieceCounts[i][retractor - 1] = 1;
-        state->pieceCounts[i][springer - 1] = 2;
-        state->pieceCounts[i][coordinator - 1] = 1;
-        state->pieceCounts[i][immobilizer - 1] = 1;
-        state->pieceCounts[i][chameleon - 1] = 2;
-        state->pieceCounts[i][king - 1] = 1;
-    }
+    state->materialScore = 0;
 }
