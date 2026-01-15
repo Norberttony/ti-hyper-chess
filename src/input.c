@@ -14,7 +14,7 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
 
     BoardGFX board =
     {
-        .px = 4,
+        .px = 44,
         .py = 4,
         .sqSize = 29,
         .lightIdx = 2,
@@ -29,7 +29,7 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
 
     Cursor cursor = {
         .x = 200,
-        .y = 200
+        .y = 100
     };
     cursor_init(&cursor, white_cursor);
 
@@ -44,9 +44,17 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
     key_update();
     while (!kb_IsDown(kb_KeyClear))
     {
+        gfx_FillScreen(5);
+        // draw an X button
+        gfx_SetColor(194);
+        gfx_SetTextBGColor(194);
+        gfx_SetTextScale(2, 2);
+        gfx_FillRectangle(295, 4, 20, 20);
+        gfx_SetTextXY(298, 7);
+        gfx_PrintString("X");
+
         if (state.toPlay == engineSide && isAgainstEngine && state.res == Result_Ongoing)
         {
-            gfx_FillScreen(255);
             boardgfx_drawState(&board, &state);
             gfx_SwapDraw();
 
@@ -66,15 +74,18 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
         {
             board.isFlipped = !board.isFlipped;
         }
+        if (key_wasJustReleased(kb_KeyEnter) && cursor.x >= 290 && cursor.y <= 25)
+        {
+            break;
+        }
 
         // perform state and graphical updates
-        gfx_FillScreen(255);
         boardgfx_drawState(&board, &state);
 
         if (state.res == Result_Ongoing)
         {
             cacheSize = input_promptMoveStep(&cursor, &board, &state, &from, &to, cache, cacheSize);
-            if (!isAgainstEngine)
+            if (!isAgainstEngine && to.type == Ind_Off && from.type == Ind_Off)
             {
                 // flip the board to match whose turn it is
                 board.isFlipped = state.toPlay == white ? 0 : 1;

@@ -50,7 +50,7 @@ Screen mainScreen =
 Screen colorScreen =
 {
     .title = "Pick a color",
-    .buttonCount = 3,
+    .buttonCount = 4,
     .buttons =
     {
         {

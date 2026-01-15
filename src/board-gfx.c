@@ -30,6 +30,16 @@ void boardgfx_drawBg(BoardGFX* board)
     int lightIdx = board->lightIdx;
     int darkIdx = board->darkIdx;
 
+    // padding
+    uint8_t p = 4;
+
+    // draws the board's border
+    gfx_SetColor(5);
+    gfx_FillRectangle(px - p, py - p, p, sqSize * BOARD_H + 2 * p);
+    gfx_FillRectangle(px - p, py - p, sqSize * BOARD_W + 2 * p, p);
+    gfx_FillRectangle(px - p, py + sqSize * BOARD_H, sqSize * BOARD_W + 2 * p, p);
+    gfx_FillRectangle(px + sqSize * BOARD_W, py - p, p, sqSize * BOARD_H + 2 * p);
+
     int idx = lightIdx;
     for (int y = 0; y < 8; y++)
     {
