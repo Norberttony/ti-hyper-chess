@@ -1,8 +1,10 @@
 #include "engine.h"
 #include <debug.h>
+#include <time.h>
 #include "defines.h"
 
 static Move bestMove;
+static int nodesVisited = 0;
 
 int pieceValues[7] =
 {
@@ -25,6 +27,7 @@ int evaluate(BoardState* state)
 
 int thinkCaptures(BoardState* state, int alpha, int beta)
 {
+    nodesVisited++;
     int score = evaluate(state);
     if (score >= beta)
     {
@@ -69,6 +72,7 @@ int think(BoardState* state, int alpha, int beta, int8_t depth, uint8_t isRoot)
     {
         return thinkCaptures(state, alpha, beta);
     }
+    nodesVisited++;
 
     // generate moves...
     Move list[MAX_MOVES];
@@ -101,10 +105,21 @@ int think(BoardState* state, int alpha, int beta, int8_t depth, uint8_t isRoot)
 
 SearchResult thinkForDepth(BoardState* state, int8_t depth)
 {
+    nodesVisited = 0;
     SearchResult r;
+    int prev = clock();
     r.score = think(state, -999999, 999999, depth, 1);
+    int curr = clock();
+    float time = (float)(curr - prev) / CLOCKS_PER_SEC;
+
     r.bestMove = &bestMove;
+    r.nodesVisited = nodesVisited;
+    r.timeTaken = time;
+
     dbg_printf("Score: %d\n", r.score);
+    dbg_printf("Nodes visited: %d\n", r.nodesVisited);
+    dbg_printf("Time taken: %f seconds\n", time);
+    dbg_printf("NPS: %f\n", nodesVisited / time);
     dbg_printf("Best move: from %hhd to %hhd\n", bestMove.from, bestMove.to);
     return r;
 }

@@ -7,6 +7,8 @@ extern int pieceValues[7];
 
 typedef struct SearchResult
 {
+    int nodesVisited;
+    float timeTaken;
     int score;
     Move* bestMove;
 } SearchResult;
