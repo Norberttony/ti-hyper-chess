@@ -14,7 +14,7 @@ int pieceValues[7] =
     1000,
     1300,
     500,
-    99999
+    0
 };
 
 void orderMoves(Move* list, uint8_t size)
@@ -98,6 +98,10 @@ int thinkCaptures(BoardState* state, int alpha, int beta)
 
 int think(BoardState* state, int alpha, int beta, int8_t depth, uint8_t isRoot)
 {
+    if (state->kingSq[side_to_index(state->toPlay)] == -1)
+    {
+        return -99999;
+    }
     if (depth == 0)
     {
         return thinkCaptures(state, alpha, beta);

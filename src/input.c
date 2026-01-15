@@ -44,7 +44,7 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
     key_update();
     while (!kb_IsDown(kb_KeyClear))
     {
-        if (state.toPlay == engineSide && isAgainstEngine)
+        if (state.toPlay == engineSide && isAgainstEngine && state.res == Result_Ongoing)
         {
             gfx_FillScreen(255);
             boardgfx_drawState(&board, &state);
@@ -53,6 +53,7 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
             // engine plays!
             SearchResult r = thinkForDepth(&state, 3);
             move_make(&state, r.bestMove);
+            state.res = move_isGameOver(&state);
             prev = clock();
         }
         int curr = clock();
@@ -70,7 +71,10 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
         gfx_FillScreen(255);
         boardgfx_drawState(&board, &state);
 
-        cacheSize = input_promptMoveStep(&cursor, &board, &state, &from, &to, cache, cacheSize);
+        if (state.res == Result_Ongoing)
+        {
+            cacheSize = input_promptMoveStep(&cursor, &board, &state, &from, &to, cache, cacheSize);
+        }
 
         // move and draw cursor
         cursor_readInput(&cursor, 150.0f * diff);
@@ -161,6 +165,7 @@ int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, 
         if (chosen)
         {
             move_make(state, chosen);
+            state->res = move_isGameOver(state);
             from->type = Ind_Off;
             to->type = Ind_Off;
         }

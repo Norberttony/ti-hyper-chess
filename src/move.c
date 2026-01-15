@@ -212,6 +212,41 @@ int8_t move_filterIllegal(BoardState* state, Move* list, int8_t size)
     return size;
 }
 
+enum Result move_isGameOver(BoardState* state)
+{
+    Move list[MAX_MOVES];
+    uint8_t size = move_gen(state, list);
+    // first check if there are any legal moves to play...
+    for (uint8_t i = 0; i < size; i++)
+    {
+        if (move_isLegal(state, list + i))
+        {
+            return Result_Ongoing;
+        }
+    }
+
+    uint8_t side = state->toPlay;
+
+    // no moves! is our king under attack?
+    state->toPlay = get_opposing_side(state->toPlay);
+    Move list2[MAX_MOVES];
+    uint8_t size2 = move_gen(state, list2);
+    for (uint8_t i = 0; i < size2; i++)
+    {
+        for (uint8_t c = 0; c < 4; c++)
+        {
+            if (list2[i].capts[c].piece == (side | king))
+            {
+                return Result_Checkmate;
+            }
+        }
+    }
+
+    // otherwise if we have no legal moves but our king is not under attack, it
+    // is stalemate.
+    return Result_Stalemate;
+}
+
 void move_findStraddlerCaptures(BoardState* state, Move* m, int8_t idx, uint8_t filter)
 {
     if (state->mailbox[idx] == -1)

@@ -14,6 +14,13 @@
 #define MAILBOX_PADW ((MAILBOX_W - BOARD_W) >> 1)
 #define MAILBOX_PADH ((MAILBOX_H - BOARD_H) >> 1)
 
+enum Result
+{
+    Result_Ongoing,
+    Result_Checkmate,
+    Result_Stalemate
+};
+
 typedef struct BoardState
 {
     // mailbox representation
@@ -26,6 +33,8 @@ typedef struct BoardState
 
     // material score from white's perspective
     int materialScore;
+
+    enum Result res;
 } BoardState;
 
 void state_init(BoardState* state);

@@ -70,4 +70,5 @@ void state_init(BoardState* state)
     state->chamSq[3] = f8;
 
     state->materialScore = 0;
+    state->res = Result_Ongoing;
 }

@@ -27,3 +27,5 @@ int8_t move_genPiece(BoardState* state, Move* list, int8_t sq, int8_t val);
 
 int8_t move_isLegal(BoardState* state, Move* move);
 int8_t move_filterIllegal(BoardState* state, Move* list, int8_t size);
+
+enum Result move_isGameOver(BoardState* state);
