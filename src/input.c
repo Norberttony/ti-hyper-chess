@@ -41,8 +41,7 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
 
     int prev = clock();
 
-    key_update();
-    while (!kb_IsDown(kb_KeyClear))
+    while (1)
     {
         int curr = clock();
         float diff = (float)(curr - prev) / CLOCKS_PER_SEC;

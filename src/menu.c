@@ -117,7 +117,14 @@ MenuOption menu_screen(Screen* screen)
         }
         if (key_wasJustPressed(kb_KeyUp))
         {
-            select--;
+            if (select == 0)
+            {
+                select = buttonCount - 1;
+            }
+            else
+            {
+                select--;
+            }
         }
         if (key_wasJustPressed(kb_KeyDown))
         {
