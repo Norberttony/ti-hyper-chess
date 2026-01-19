@@ -110,68 +110,54 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
 
 int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to, Move* cache, int8_t cacheSize)
 {
-    // determine which indicator user is deciding for...
-    Indicator* active = 0;
-    Indicator* prev = 0;
-    if (from->type == Ind_Off || from->type == Ind_Select)
+    if (from->type == Ind_Off)
     {
-        active = from;
+        from->type = Ind_Select;
+    }
+
+    Square onSq = boardgfx_pxToGfxSq(board, cursor->x, cursor->y);
+    int mSq = 0;
+    int8_t val = -1;
+    uint8_t hasFromBeenSelectedNow = 0;
+
+    Indicator* active = from->type == Ind_Select ? from : to;
+
+    if (!boardgfx_isSqOutOfBounds(onSq))
+    {
+        mSq = board_to_mailbox(onSq.x, onSq.y);
+        val = state->mailbox[mSq];
+        active->sq = onSq;
+        active->type = Ind_Select;
     }
     else
     {
-        prev = from;
-        active = to;
+        active->type = Ind_Off;
     }
 
-    if (prev)
+    // has a piece been selected?
+    if (val > 0 && get_piece_side(val) == state->toPlay && key_wasJustPressed(kb_KeyEnter))
     {
-        indicator_draw(board, prev);
-    }
-
-    active->type = Ind_Select;
-
-    Square sq = boardgfx_pxToGfxSq(board, cursor->x, cursor->y);
-    if (!boardgfx_isSqOutOfBounds(sq) && active)
-    {
-        active->sq = sq;
-        if (!prev || !boardgfx_areSquaresEqual(prev->sq, sq))
+        if (from->type == Ind_Selected && boardgfx_areSquaresEqual(from->sq, onSq))
         {
-            indicator_draw(board, active);
+            // deselect
+            from->type = Ind_Select;
+            to->type = Ind_Off;
+            cacheSize = 0;
         }
-
-        if (key_wasJustPressed(kb_KeyEnter))
+        else
         {
-            if (prev && boardgfx_areSquaresEqual(prev->sq, active->sq))
-            {
-                // deselect
-                prev->type = Ind_Off;
-            }
-            else
-            {
-                // select
-                active->type = Ind_Selected;
-            }
-        }
-    }
-
-    if (from->type == Ind_Selected)
-    {
-        // was "from" just selected?
-        if (active == from)
-        {
-            // update moves only when necessary
-            int mSq = board_to_mailbox(from->sq.x, from->sq.y);
-            cacheSize = move_genPiece(state, cache, mSq, state->mailbox[mSq]);
+            // select
+            from->sq = onSq;
+            from->type = Ind_Selected;
+            cacheSize = move_genPiece(state, cache, mSq, val);
             cacheSize = move_filterIllegal(state, cache, cacheSize);
+            hasFromBeenSelectedNow = 1;
         }
     }
-    else
-    {
-        cacheSize = 0;
-    }
 
-    if (to->type == Ind_Selected)
+    if (val > -1 && from->type == Ind_Selected && !hasFromBeenSelectedNow && key_wasJustPressed(kb_KeyEnter))
     {
+        // consider the input as an attempt to select "to"
         int toSq = board_to_mailbox(to->sq.x, to->sq.y);
 
         // check if this move exists and make it
@@ -192,12 +178,16 @@ int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, 
             state->res = move_isGameOver(state);
             from->type = Ind_Off;
             to->type = Ind_Off;
+            cacheSize = 0;
         }
     }
     else
     {
         indicator_drawMoves(board, cache, cacheSize, state->toPlay);
     }
+
+    indicator_draw(board, from);
+    indicator_draw(board, to);
 
     return cacheSize;
 }
