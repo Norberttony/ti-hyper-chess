@@ -179,7 +179,7 @@ int8_t move_isLegal(BoardState* state, Move* move)
     int8_t side = state->toPlay;
     move_make(state, move);
     // can the opponent take our king?
-    Move list[MAX_MOVES];
+    Move* list = (Move*)malloc(MAX_MOVES * sizeof(Move));
     int8_t size = move_gen(state, list);
     for (int8_t i = 0; i < size; i++)
     {
@@ -189,11 +189,13 @@ int8_t move_isLegal(BoardState* state, Move* move)
             if (m->capts[c].piece == (side | king))
             {
                 move_unmake(state, move);
+                free(list);
                 return 0;
             }
         }
     }
     move_unmake(state, move);
+    free(list);
     return 1;
 }
 
@@ -214,13 +216,14 @@ uint8_t move_filterIllegal(BoardState* state, Move* list, uint8_t size)
 
 enum Result move_isGameOver(BoardState* state)
 {
-    Move list[MAX_MOVES];
+    Move* list = (Move*)malloc(MAX_MOVES * sizeof(Move));
     uint8_t size = move_gen(state, list);
     // first check if there are any legal moves to play...
     for (uint8_t i = 0; i < size; i++)
     {
         if (move_isLegal(state, list + i))
         {
+            free(list);
             return Result_Ongoing;
         }
     }
@@ -236,10 +239,16 @@ enum Result move_isGameOver(BoardState* state)
         {
             if (list[i].capts[c].piece == (side | king))
             {
+                state->toPlay = get_opposing_side(state->toPlay);
+                free(list);
                 return Result_Checkmate;
             }
         }
     }
+
+    state->toPlay = get_opposing_side(state->toPlay);
+
+    free(list);
 
     // otherwise if we have no legal moves but our king is not under attack, it
     // is stalemate.
@@ -263,7 +272,7 @@ void move_findStraddlerCaptures(BoardState* state, Move* m, int8_t idx, uint8_t 
         int8_t* nextVal2 = state->mailbox + next2;
         if (
             (
-                (filter && (opp | filter) == nextVal) ||
+                (!filter || (opp | filter) == nextVal) &&
                 (nextVal > 0 && get_piece_side(nextVal) != side)
             ) && (
                 // normal straddler capture
@@ -405,7 +414,7 @@ uint8_t move_genImmobilizer(BoardState* state, Move* list, int8_t sq)
 {
     uint8_t opp = get_opposing_side(state->toPlay);
     uint8_t nsti = side_to_cham_index(opp);
-    
+
     if (is_adjacent(state->chamSq[nsti], sq) || is_adjacent(state->chamSq[nsti + 1], sq))
     {
         return 0;
@@ -601,7 +610,10 @@ uint8_t move_genChameleon(BoardState* state, Move* list, int8_t sq)
             m->captsCount = 0;
 
             // to capture straddler must capture like straddler
-            move_findStraddlerCaptures(state, m, jumpIdx, straddler);
+            if ((i & 1) == 0)
+            {
+                move_findStraddlerCaptures(state, m, jumpIdx, straddler);
+            }
 
             // to capture coordinator must capture like coordinator
             if (kingSq > -1)

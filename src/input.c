@@ -33,8 +33,8 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
     };
     cursor_init(&cursor, white_cursor);
 
-    Move cache[MAX_MOVES];
-    int8_t cacheSize = 0;
+    Move* cache = (Move*)malloc(MAX_MOVES * sizeof(Move));
+    uint8_t cacheSize = 0;
 
     Indicator from = { 0 };
     Indicator to = { 0 };
@@ -44,7 +44,14 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
     key_update();
     while (!kb_IsDown(kb_KeyClear))
     {
+        int curr = clock();
+        float diff = (float)(curr - prev) / CLOCKS_PER_SEC;
+        prev = curr;
+
+        // draw the entire screen (excluding cursor...)
         gfx_FillScreen(5);
+        boardgfx_drawState(&board, &state);
+
         // draw an X button
         gfx_SetColor(194);
         gfx_SetTextBGColor(194);
@@ -55,49 +62,51 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
 
         if (state.toPlay == engineSide && isAgainstEngine && state.res == Result_Ongoing)
         {
-            boardgfx_drawState(&board, &state);
+            // handle engine input...
             gfx_SwapDraw();
 
             // engine plays!
             SearchResult r = thinkForDepth(&state, 3);
             move_make(&state, r.bestMove);
             state.res = move_isGameOver(&state);
+
+            // reset frame counter
             prev = clock();
         }
-        int curr = clock();
-        float diff = (float)(curr - prev) / CLOCKS_PER_SEC;
-        prev = curr;
-
-        key_update();
-
-        if (key_wasJustPressed(kb_Key2nd))
+        else
         {
-            board.isFlipped = !board.isFlipped;
-        }
-        if (key_wasJustReleased(kb_KeyEnter) && cursor.x >= 290 && cursor.y <= 25)
-        {
-            break;
-        }
+            // handle user input...
+            key_update();
 
-        // perform state and graphical updates
-        boardgfx_drawState(&board, &state);
-
-        if (state.res == Result_Ongoing)
-        {
-            cacheSize = input_promptMoveStep(&cursor, &board, &state, &from, &to, cache, cacheSize);
-            if (!isAgainstEngine && to.type == Ind_Off && from.type == Ind_Off)
+            if (key_wasJustPressed(kb_Key2nd))
             {
-                // flip the board to match whose turn it is
-                board.isFlipped = state.toPlay == white ? 0 : 1;
+                board.isFlipped = !board.isFlipped;
             }
+            else if (key_wasJustReleased(kb_KeyEnter) && cursor.x >= 290 && cursor.y <= 25)
+            {
+                // hit the X button
+                break;
+            }
+
+            if (state.res == Result_Ongoing)
+            {
+                cacheSize = input_promptMoveStep(&cursor, &board, &state, &from, &to, cache, cacheSize);
+                if (!isAgainstEngine && to.type == Ind_Off && from.type == Ind_Off)
+                {
+                    // flip the board to match whose turn it is
+                    board.isFlipped = state.toPlay == white ? 0 : 1;
+                }
+            }
+    
+            // move and draw cursor
+            cursor_readInput(&cursor, 150.0f * diff);
+            cursor_draw(&cursor);
+    
+            gfx_SwapDraw();
         }
-
-        // move and draw cursor
-        cursor_readInput(&cursor, 150.0f * diff);
-        cursor_draw(&cursor);
-
-        gfx_SwapDraw();
     }
+
+    free(cache);
 }
 
 int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, Indicator* from, Indicator* to, Move* cache, int8_t cacheSize)

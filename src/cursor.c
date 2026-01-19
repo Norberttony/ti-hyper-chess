@@ -27,6 +27,24 @@ void cursor_readInput(Cursor* cursor, float speed)
     {
         cursor->y += speed;
     }
+
+    // bounds checking
+    if (cursor->x < 0)
+    {
+        cursor->x = 0;
+    }
+    else if (cursor->x > 320)
+    {
+        cursor->x = 320;
+    }
+    if (cursor->y < 0)
+    {
+        cursor->y = 0;
+    }
+    else if (cursor->y > 240)
+    {
+        cursor->y = 240;
+    }
 }
 
 void cursor_draw(Cursor* cursor)
