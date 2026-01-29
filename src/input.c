@@ -66,7 +66,7 @@ void input_boardLoop(uint8_t isAgainstEngine, uint8_t engineSide)
 
             // engine plays!
             SearchResult r = thinkForDepth(&state, 3);
-            move_make(&state, r.bestMove);
+            boardgfx_playMove(&board, &state, r.bestMove);
             state.res = move_isGameOver(&state);
 
             // reset frame counter
@@ -174,7 +174,7 @@ int8_t input_promptMoveStep(Cursor* cursor, BoardGFX* board, BoardState* state, 
 
         if (chosen)
         {
-            move_make(state, chosen);
+            boardgfx_playMove(board, state, chosen);
             state->res = move_isGameOver(state);
             from->type = Ind_Off;
             to->type = Ind_Off;

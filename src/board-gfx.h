@@ -1,6 +1,8 @@
 #pragma once
 
 #include "board-state.h"
+#include "move.h"
+#include "indicator.h"
 
 typedef struct BoardGFX
 {
@@ -10,13 +12,10 @@ typedef struct BoardGFX
     int lightIdx;
     int darkIdx;
     int isFlipped;
+    // last move highlights
+    Indicator fromHl;
+    Indicator toHl;
 } BoardGFX;
-
-typedef struct Square
-{
-    int x;
-    int y;
-} Square;
 
 // draws the background of a board
 void boardgfx_drawBg(BoardGFX* board);
@@ -34,6 +33,9 @@ Square boardgfx_stateSqToGfxSq(int sq);
 int boardgfx_isSqOutOfBounds(Square sq);
 
 int boardgfx_areSquaresEqual(Square sq1, Square sq2);
+
+// plays the move on the gfx and the state
+void boardgfx_playMove(BoardGFX* board, BoardState* state, Move* move);
 
 static inline void boardgfx_norm_sq(BoardGFX* board, Square* sq)
 {

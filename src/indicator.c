@@ -2,6 +2,7 @@
 #include <graphx.h>
 #include "gfx/gfx.h"
 #include "defines.h"
+#include "board-gfx.h"
 
 void indicator_draw(BoardGFX* board, Indicator* i)
 {
@@ -10,8 +11,9 @@ void indicator_draw(BoardGFX* board, Indicator* i)
     boardgfx_norm_sq(board, &loc);
 
     gfx_sprite_t* spr = 0;
-    int x = board->px + board->sqSize * loc.x;
-    int y = board->py + board->sqSize * loc.y;
+    int sqSize = board->sqSize;
+    int x = board->px + sqSize * loc.x;
+    int y = board->py + sqSize * loc.y;
     switch (i->type)
     {
         case Ind_Select:
@@ -28,9 +30,12 @@ void indicator_draw(BoardGFX* board, Indicator* i)
         draw_move:
             (void)x;
             int s = 7; // size of move indicator
-            int sqSize = board->sqSize;
             int pad = (sqSize - s) / 2;
             gfx_FillRectangle(x + pad, y + pad, s, s);
+            return;
+        case Ind_Highlight:
+            gfx_SetColor(119);
+            gfx_FillRectangle(x, y, sqSize, sqSize);
             return;
         default:
             return;

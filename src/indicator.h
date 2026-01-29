@@ -1,7 +1,9 @@
 #pragma once
 
-#include "board-gfx.h"
 #include "move.h"
+
+// forward declaration from board-gfx
+typedef struct BoardGFX BoardGFX;
 
 enum IndicatorType
 {
@@ -9,8 +11,15 @@ enum IndicatorType
     Ind_Select,
     Ind_Selected,
     Ind_WhiteMove,
-    Ind_BlackMove
+    Ind_BlackMove,
+    Ind_Highlight
 };
+
+typedef struct Square
+{
+    int x;
+    int y;
+} Square;
 
 typedef struct Indicator
 {

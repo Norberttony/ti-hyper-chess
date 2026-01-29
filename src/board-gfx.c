@@ -75,6 +75,10 @@ void boardgfx_drawPiece(BoardGFX* board, int x, int y, int piece)
 void boardgfx_drawState(BoardGFX* board, BoardState* state)
 {
     boardgfx_drawBg(board);
+
+    indicator_draw(board, &board->fromHl);
+    indicator_draw(board, &board->toHl);
+
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
@@ -143,4 +147,15 @@ int boardgfx_isSqOutOfBounds(Square sq)
 int boardgfx_areSquaresEqual(Square sq1, Square sq2)
 {
     return sq1.x == sq2.x && sq1.y == sq2.y;
+}
+
+void boardgfx_playMove(BoardGFX* board, BoardState* state, Move* move)
+{
+    move_make(state, move);
+
+    // set last move highlight
+    board->fromHl.sq = boardgfx_stateSqToGfxSq(move->from);
+    board->toHl.sq = boardgfx_stateSqToGfxSq(move->to);
+    board->fromHl.type = Ind_Highlight;
+    board->toHl.type = Ind_Highlight;
 }
